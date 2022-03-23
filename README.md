@@ -29,5 +29,8 @@ From 1.25 to 4.11.
 I don't know how far I can go, the possibilities are not too good, but whatever the case the AS608 code refactoring module and the overall framework of the implementation of the callback and setter effect must be completed! Hopefully it will be done better subsequently.
 
 # Progress notes
-The current version is just a more complete AS608 module, (splitting the string and converting it, calculating the checksum of the accepted packet, GetImage implementation, GenChar implementation, compare, find, store, read, delete fingerprints and other implementations,) (much more complex than expected. 😂) Then there is the use of pins for the start-up application control of the electric lock motor. Again a JS front end control script was written.
+3.21 The current version is just a more complete AS608 module, (splitting the string and converting it, calculating the checksum of the accepted packet, GetImage implementation, GenChar implementation, compare, find, store, read, delete fingerprints and other implementations,) (much more complex than expected. 😂) Then there is the use of pins for the start-up application control of the electric lock motor. Again a JS front end control script was written.
 However, all the above functions were only implemented on the Raspberry Pi and still not interactive.
+
+3.23 The current components for the updated motor section have been uploaded, so all components have been uploaded, but the code needs to be rewritten due to the requirement to change all external functions to classes to implement the callback mechanism for the entire code.
+As the current AS608 is written in c, much of the code is in the form of external functions to guide the control of the process, and the process actually needs to be called in the form of a class, so the task at hand is to rewrite the code
