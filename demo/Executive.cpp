@@ -9,7 +9,7 @@ Executive::~Executive()
 {
 	
 }
-/*
+
 void Executive::run()
 {
 	// 1.读取配置文件，获得芯片地址和通信密码
@@ -826,4 +826,4 @@ void Executive::printUsage() {
 
   printf("\nUsage:\n  ./fp [command] [param] [option]\n\n");
 }	
-*/
+

@@ -31,7 +31,7 @@ class Executive{
 		Executive();
 		~Executive();
 		void run();
-		/*
+
 		void printConfig();
 		void printUsage();
 		bool readConfig();  // 读取文件到 g_config
@@ -44,7 +44,6 @@ class Executive{
 		bool waitUntilNotDetectFinger(int wait_time);
 		bool PS_Exit();
 		void atExitFunc();
-		*/
 		
 	private:
 		Car a1;
