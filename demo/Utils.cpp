@@ -1,4 +1,4 @@
-#include "./utils.h"
+#include "./Utils.h"
 
 void Bike::trimSpaceInFile(const char* filename) {
   FILE* fp = fopen(filename, "r");

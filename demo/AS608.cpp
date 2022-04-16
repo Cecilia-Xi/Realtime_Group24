@@ -53,7 +53,7 @@ int Car::Calibrate(const uchar* buf, int size) {
 bool Car::Check(const uchar* buf, int size) {
   //init check sum
   int count_ = 0; 
-  Merge(&count_, buf+size-2, 2); 
+  Merge((uint*)&count_, buf+size-2, 2); 
 
   // sum of check
   int count = Calibrate(buf, size);
@@ -180,7 +180,7 @@ bool Car::RecvPacket(uchar* pData, int validDataSize) {
       // 接收完一个完整的数据包(139 bytes)
       if (readBufSize >= realPacketSize) {
         int count_ = 0;
-        Merge(&count_, readBuf+realPacketSize-2, 2);
+        Merge((uint*)&count_, readBuf+realPacketSize-2, 2);
         if (Calibrate(readBuf, realPacketSize) != count_) {
           free(readBuf);
           g_error_code = 0x01;
@@ -349,7 +349,7 @@ int Car::GenOrder(uchar orderCode, const char* fmt, ...) {
             g_order[offset] = ucharVal;
             break;
           case 's':
-            strVal = va_arg(ap, char*);
+            strVal = va_arg(ap, uchar*);
             memcpy(g_order+offset, strVal, width);
             break;
           default:
@@ -426,7 +426,7 @@ bool Car::PS_Match(int* pScore) {
   // 接收应答包，核对确认码和检校和
   return (RecvReply(g_reply, 14) && 
           Check(g_reply, 14) &&
-          Merge(pScore, g_reply+10, 2));
+          Merge((uint*)pScore, g_reply+10, 2));
 }
 
 
@@ -437,8 +437,8 @@ bool Car::PS_Search(uchar bufferID, int startPageID, int count, int* pPageID, in
   // 接收应答包，核对确认码和检校和
   return ( RecvReply(g_reply, 16) && 
            Check(g_reply, 16) && 
-           (Merge(pPageID, g_reply+10, 2)) &&  // 给pageID赋值，返回true
-           (Merge(pScore,  g_reply+12, 2))     // 给score赋值，返回true
+           (Merge((uint*)pPageID, g_reply+10, 2)) &&  // 给pageID赋值，返回true
+           (Merge((uint*)pScore,  g_reply+12, 2))     // 给score赋值，返回true
         );
 }
 
@@ -703,7 +703,7 @@ bool Car::PS_Enroll(int* pPageID) {
   // 接收数据，核对确认码和检校和
   return (RecvReply(g_reply, 14) &&
           Check(g_reply, 14) &&
-          Merge(pPageID, g_reply+10, 2)
+          Merge((uint*)pPageID, g_reply+10, 2)
          );
 }
 
@@ -715,8 +715,8 @@ bool Car::PS_Identify(int* pPageID, int* pScore) {
   // 接收数据，核对确认码和检校和
   return (RecvReply(g_reply, 16) &&
           Check(g_reply, 16) &&
-          Merge(pPageID, g_reply+10, 2) &&
-          Merge(pScore,  g_reply+12, 2)
+          Merge((uint*)pPageID, g_reply+10, 2) &&
+          Merge((uint*)pScore,  g_reply+12, 2)
          );
 }
 
@@ -749,7 +749,7 @@ bool Car::PS_GetRandomCode(uint* pRandom) {
   // 接收数据，核对确认码和检校和
   return (RecvReply(g_reply, 16) &&
           Check(g_reply, 16) &&
-          Merge(pRandom, g_reply+10, 4)
+          Merge((uint*)pRandom, g_reply+10, 4)
          );
 }
 
@@ -830,8 +830,8 @@ bool Car::PS_HighSpeedSearch(uchar bufferID, int startPageID, int count, int* pP
   // 接收数据，核对确认码和检校和
   return ( RecvReply(g_reply, 16) && 
            Check(g_reply, 16) && 
-           (Merge(pPageID, g_reply+10, 2)) &&  // 给pageID赋值，返回true
-           (Merge(pScore,  g_reply+12, 2))     // 给score赋值，返回true
+           (Merge((uint*)pPageID, g_reply+10, 2)) &&  // 给pageID赋值，返回true
+           (Merge((uint*)pScore,  g_reply+12, 2))     // 给score赋值，返回true
         );
 }
 
@@ -843,7 +843,7 @@ bool Car::PS_ValidTempleteNum(int* pValidN) {
   // 接收数据，核对确认码和检校和
   return (RecvReply(g_reply, 14) &&
           Check(g_reply, 14) &&
-          Merge(pValidN, g_reply+10, 2)
+          Merge((uint*)pValidN, g_reply+10, 2)
          );
 }
 
