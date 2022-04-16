@@ -2,7 +2,7 @@
 
 Executive::Executive()
 {
-	a1.pri();
+
 }
 	
 Executive::~Executive()
@@ -10,7 +10,7 @@ Executive::~Executive()
 	
 }
 
-void Executive::run()
+void Executive::run(int argc, char *argv[])
 {
 	// 1.读取配置文件，获得芯片地址和通信密码
 	if (!readConfig())
@@ -25,7 +25,7 @@ void Executive::run()
 	// 3.初始化wiringPi库
 	if (-1 == wiringPiSetup()) {
 		printf("wiringPi setup failed!\n");
-	return 1;
+    exit(0);
 	}
 
 	// 4.检测是否有手指放上的GPIO端口，设为输入模式
@@ -34,7 +34,7 @@ void Executive::run()
 	// 5.打开串口
 	if((g_fd = serialOpen(g_config.serial, g_config.baudrate)) < 0)	{
 		fprintf(stderr,"Unable to open serial device: %s\n", strerror(errno));
-		return 1;
+    exit(0);
 	}
 
 	// 6.注册退出函数(打印一些信息、关闭串口等)
@@ -42,18 +42,17 @@ void Executive::run()
 
 	// 7.初始化 AS608 模块
 	// 地址 密码
-	PS_Setup(g_config.address, g_config.password) ||  PS_Exit();
+	car1.PS_Setup(g_config.address, g_config.password) ||  PS_Exit();
 
 	// 8.主处理函数，解析普通命令(argv[1])，
 	analyseArgv(argc, argv);
 
-	return 0;
 }
 	
 // 因为as608.h内的函数执行失败而退出程序
 bool Executive::PS_Exit()
 {
-  printf("ERROR! code=%02X, desc=%s\n", g_error_code, PS_GetErrorDesc());
+  printf("ERROR! code=%02X, desc=%s\n", g_error_code, car1.PS_GetErrorDesc());
   exit(2);
   return true;
 }
@@ -120,7 +119,7 @@ void Executive::priorAnalyseArgv(int argc, char* argv[]) {
   // 配置通信地址
   else if (match("cfgaddr")) {
     checkArgc(3);
-    g_config.address = toUInt(argv[2]);
+    g_config.address = bike1.toUInt(argv[2]);
     writeConfig();
     exit(0);
   }
@@ -128,7 +127,7 @@ void Executive::priorAnalyseArgv(int argc, char* argv[]) {
   // 配置通信密码
   else if (match("cfgpwd")) {
     checkArgc(3);
-    g_config.password = toUInt(argv[2]);
+    g_config.password = bike1.toUInt(argv[2]);
     g_config.has_password = 1;
     writeConfig();
     exit(0);
@@ -144,14 +143,14 @@ void Executive::priorAnalyseArgv(int argc, char* argv[]) {
 
   else if (match("cfgbaud")) {
     checkArgc(3);
-    g_config.baudrate = toInt(argv[2]);
+    g_config.baudrate = bike1.toInt(argv[2]);
     writeConfig();
     exit(0);
   }
 
   else if (match("cfgpin")) {
     checkArgc(3);
-    g_config.detect_pin = toInt(argv[2]);
+    g_config.detect_pin = bike1.toInt(argv[2]);
     writeConfig();
     exit(0);
   }
@@ -160,7 +159,7 @@ void Executive::priorAnalyseArgv(int argc, char* argv[]) {
 // 阻塞至检测到手指，最长阻塞wait_time毫秒
 bool Executive::waitUntilDetectFinger(int wait_time) {
   while (true) {
-    if (PS_DetectFinger()) {
+    if (car1.PS_DetectFinger()) {
       return true;
     }
     else {
@@ -175,7 +174,7 @@ bool Executive::waitUntilDetectFinger(int wait_time) {
 
 bool Executive::waitUntilNotDetectFinger(int wait_time) {
   while (true) {
-    if (!PS_DetectFinger()) {
+    if (!car1.PS_DetectFinger()) {
       return true;
     }
     else {
@@ -197,8 +196,8 @@ void Executive::analyseArgv(int argc, char* argv[]) {
     printf("Please put your finger on the module.\n");
     if (waitUntilDetectFinger(5000)) {
       delay(500);
-      PS_GetImage() || PS_Exit();
-      PS_GenChar(1) || PS_Exit();
+      car1.PS_GetImage() || PS_Exit();
+      car1.PS_GenChar(1) || PS_Exit();
     }
     else {
       printf("Error: Didn't detect finger!\n");
@@ -213,8 +212,8 @@ void Executive::analyseArgv(int argc, char* argv[]) {
       // 第二次录入指纹
       if (waitUntilDetectFinger(5000)) {
         delay(500);
-        PS_GetImage() || PS_Exit();
-        PS_GenChar(2) || PS_Exit();
+        car1.PS_GetImage() || PS_Exit();
+        car1.PS_GenChar(2) || PS_Exit();
       }
       else {
         printf("Error: Didn't detect finger!\n");
@@ -227,7 +226,7 @@ void Executive::analyseArgv(int argc, char* argv[]) {
     }
 
     int score = 0;
-    if (PS_Match(&score)) {
+    if (car1.PS_Match(&score)) {
       printf("Matched! score=%d\n", score);
     }
     else {
@@ -239,10 +238,10 @@ void Executive::analyseArgv(int argc, char* argv[]) {
       PS_Exit();
 
     // 合并特征文件
-    PS_RegModel() || PS_Exit();
-    PS_StoreChar(2, toInt(argv[2])) || PS_Exit();
+    car1.PS_RegModel() || PS_Exit();
+    car1.PS_StoreChar(2, bike1.toInt(argv[2])) || PS_Exit();
 
-    printf("OK! New fingerprint saved to pageID=%d\n", toInt(argv[2]));
+    printf("OK! New fingerprint saved to pageID=%d\n", bike1.toInt(argv[2]));
   }
 
   else if (match("enroll")) {
@@ -259,14 +258,14 @@ void Executive::analyseArgv(int argc, char* argv[]) {
     }
         
     int pageID = 0;
-    PS_Enroll(&pageID) || PS_Exit();
+    car1.PS_Enroll(&pageID) || PS_Exit();
 
     printf("OK! New fingerprint saved to pageID=%d\n", pageID);
   }
   
   else if (match("info")) {
     checkArgc(2);
-    PS_GetAllInfo() || PS_Exit();
+    car1.PS_GetAllInfo() || PS_Exit();
 
     printf("Product SN:        %s\n", g_as608.product_sn);
     printf("Software version:  %s\n", g_as608.software_version);
@@ -292,7 +291,7 @@ void Executive::analyseArgv(int argc, char* argv[]) {
       exit(3);
     }
 
-    PS_Empty() || PS_Exit();
+    car1.PS_Empty() || PS_Exit();
     printf("OK!\n");
   }
 
@@ -302,13 +301,13 @@ void Executive::analyseArgv(int argc, char* argv[]) {
 
     // 判断参数个数
     if (g_argc == 3) {
-      startPageID = toInt(argv[2]);
+      startPageID = bike1.toInt(argv[2]);
       count = 1;
       printf("Confirm to delete fingerprint %d: (Y/n)? ", startPageID);
     }
     else if (argc == 4) {
-      startPageID = toInt(argv[2]);
-      count = toInt(argv[3]);
+      startPageID = bike1.toInt(argv[2]);
+      count = bike1.toInt(argv[3]);
       printf("Confirm to delete fingerprint %d-%d: (Y/n)? ", startPageID, startPageID+count-1);
     }
     else {
@@ -325,14 +324,14 @@ void Executive::analyseArgv(int argc, char* argv[]) {
       exit(0);
     }
 
-    PS_DeleteChar(startPageID, count) || PS_Exit();
+    car1.PS_DeleteChar(startPageID, count) || PS_Exit();
     printf("OK!\n");
   }
 
   else if (match("count")) {
     checkArgc(2);
     int count = 0;
-    PS_ValidTempleteNum(&count) || PS_Exit();
+    car1.PS_ValidTempleteNum(&count) || PS_Exit();
     printf("%d\n", count);
   }
 
@@ -340,11 +339,11 @@ void Executive::analyseArgv(int argc, char* argv[]) {
     checkArgc(2);
 
     printf("Please put your finger on the module.\n");
-    PS_GetImage() || PS_Exit();
-    PS_GenChar(1) || PS_Exit();
+    car1.PS_GetImage() || PS_Exit();
+    car1.PS_GenChar(1) || PS_Exit();
 
     int pageID = 0, score = 0;
-    if (!PS_Search(1, 0, 300, &pageID, &score))
+    if (!car1.PS_Search(1, 0, 300, &pageID, &score))
       PS_Exit();
     else
       printf("Matched! pageID=%d score=%d\n", pageID, score);
@@ -354,11 +353,11 @@ void Executive::analyseArgv(int argc, char* argv[]) {
     checkArgc(2);
 
     printf("Please put your finger on the module.\n");
-    PS_GetImage() || PS_Exit();
-    PS_GenChar(1) || PS_Exit();
+    car1.PS_GetImage() || PS_Exit();
+    car1.PS_GenChar(1) || PS_Exit();
 
     int pageID = 0, score = 0;
-    if (!PS_HighSpeedSearch(1, 0, 300, &pageID, &score))
+    if (!car1.PS_HighSpeedSearch(1, 0, 300, &pageID, &score))
       PS_Exit();
     else
       printf("Matched! pageID=%d score=%d\n", pageID, score);
@@ -380,7 +379,7 @@ void Executive::analyseArgv(int argc, char* argv[]) {
       }
     }
 
-    PS_Identify(&pageID, &score) || PS_Exit();
+    car1.PS_Identify(&pageID, &score) || PS_Exit();
     printf("Matched! pageID=%d score=%d\n", pageID, score);
   }
 
@@ -388,7 +387,7 @@ void Executive::analyseArgv(int argc, char* argv[]) {
   else if (match("list")) {
     checkArgc(2);
     int indexList[512] = { 0 };
-    PS_ReadIndexTable(indexList, 512) ||  PS_Exit();
+    car1.PS_ReadIndexTable(indexList, 512) ||  PS_Exit();
 
     int i = 0;
     for (i = 0; i < 300; ++i) {
@@ -404,81 +403,81 @@ void Executive::analyseArgv(int argc, char* argv[]) {
   else if (match("getimage")) {
     checkArgc(2);
     printf("Please put your finger on the module.\n");
-    PS_GetImage() || PS_Exit();
+    car1.PS_GetImage() || PS_Exit();
     printf("OK!\n");
   }
 
   else if (match("genchar")) {
     checkArgc(3);
-    PS_GenChar(toInt(argv[2])) || PS_Exit();
+    car1.PS_GenChar(bike1.toInt(argv[2])) || PS_Exit();
     printf("OK!\n");
   }
 
   else if (match("regmodel")) {
     checkArgc(2);
-    PS_RegModel() ||  PS_Exit();
+    car1.PS_RegModel() ||  PS_Exit();
     printf("OK!\n");
   }
 
   else if (match("storechar")) {
     checkArgc(4);
-    PS_StoreChar(toInt(argv[2]), toInt(argv[3])) ||  PS_Exit();
-    printf("OK! Stored in pageID=%d\n", toInt(argv[3]));
+    car1.PS_StoreChar(bike1.toInt(argv[2]), bike1.toInt(argv[3])) ||  PS_Exit();
+    printf("OK! Stored in pageID=%d\n", bike1.toInt(argv[3]));
   }
 
   else if (match("loadchar")) {
     checkArgc(4);
-    PS_LoadChar(toInt(argv[2]), toInt(argv[3])) || PS_Exit();
-    printf("OK! Loaded to bufferID=%d\n", toInt(argv[2]));
+    car1.PS_LoadChar(bike1.toInt(argv[2]), bike1.toInt(argv[3])) || PS_Exit();
+    printf("OK! Loaded to bufferID=%d\n", bike1.toInt(argv[2]));
   }
 
   else if (match("match")) {
     checkArgc(2);
     int score = 0;
-    PS_Match(&score) || PS_Exit();
+    car1.PS_Match(&score) || PS_Exit();
     printf("Matched! Score=%d\n", score);
   }
 
   else if (match("random")) {
     checkArgc(2);
     uint randomNum = 0; // 必须是unsigned int，否则可能会溢出
-    PS_GetRandomCode(&randomNum) ||  PS_Exit();
+    car1.PS_GetRandomCode(&randomNum) ||  PS_Exit();
     printf("%u\n", randomNum);
   }
   
   else if (match("upchar")) {
     checkArgc(4);
-    PS_UpChar(toInt(argv[2]), argv[3]) ||  PS_Exit();
+    car1.PS_UpChar(bike1.toInt(argv[2]), argv[3]) ||  PS_Exit();
     printf("OK!\n");
   }
 
   else if (match("downchar")) {
     checkArgc(4);
-    PS_DownChar(toInt(argv[2]), argv[3]) || PS_Exit();
+    car1.PS_DownChar(bike1.toInt(argv[2]), argv[3]) || PS_Exit();
     printf("OK!\n");
   }
 
   else if (match("upimage")) {
     checkArgc(3);
-    PS_UpImage(argv[2]) || PS_Exit();
+    car1.PS_UpImage(argv[2]) || PS_Exit();
     printf("OK!\n");
   }
 
   else if (match("downimage")) {
     checkArgc(3);
-    PS_DownImage(argv[2]) ||  PS_Exit();
+    car1.PS_DownImage(argv[2]) ||  PS_Exit();
     printf("OK!\n");
   }
 
   else if (match("flush")) {
     checkArgc(2);
-    PS_Flush();
+    car1.PS_Flush();
     printf("OK!\n");
   }
 
   else if (match("writereg")) {
     checkArgc(4);
-    PS_WriteReg(toInt(argv[2]), toInt(argv[3])) ||  PS_Exit();
+    car1.PS_WriteReg(bike1.toInt(argv[2]), bike1.toInt(argv[3])) ||  PS_Exit();
     printf("OK!\n");
   }
 
@@ -488,7 +487,7 @@ void Executive::analyseArgv(int argc, char* argv[]) {
       exit(0);
     }
     else if (g_argc == 3) {
-      PS_SetBaudRate(toInt(argv[2])) ||  PS_Exit();
+      car1.PS_SetBaudRate(bike1.toInt(argv[2])) ||  PS_Exit();
     }
     else {
       printf("Command \"baudrate\" accept 1 parameter at most\n");
@@ -504,7 +503,7 @@ void Executive::analyseArgv(int argc, char* argv[]) {
       exit(0);
     }
     else if (g_argc == 3) {
-      PS_SetSecureLevel(toInt(argv[2])) ||  PS_Exit();
+      car1.PS_SetSecureLevel(bike1.toInt(argv[2])) ||  PS_Exit();
     }
     else {
       printf("Command \"level\" accept 1 parameter at most\n");
@@ -520,7 +519,7 @@ void Executive::analyseArgv(int argc, char* argv[]) {
       exit(0);
     }
     else if (g_argc == 3) {
-      PS_SetPacketSize(toInt(argv[2])) ||  PS_Exit();
+      car1.PS_SetPacketSize(bike1.toInt(argv[2])) ||  PS_Exit();
     }
     else {
       printf("Command \"packetsize\" accept 1 parameter at most\n");
@@ -536,8 +535,8 @@ void Executive::analyseArgv(int argc, char* argv[]) {
       exit(0);
     }
     else if (g_argc == 3) {
-      PS_SetChipAddr(toUInt(argv[2])) || PS_Exit();
-      g_config.address = toUInt(argv[2]);
+      car1.PS_SetChipAddr(bike1.toUInt(argv[2])) || PS_Exit();
+      g_config.address = bike1.toUInt(argv[2]);
       if (writeConfig())
         printf("New chip address is 0x%08x\n", g_as608.chip_addr);
     }
@@ -551,23 +550,23 @@ void Executive::analyseArgv(int argc, char* argv[]) {
 
   else if (match("setpwd")) {
     checkArgc(3);
-    PS_SetPwd(toUInt(argv[2])) ||  PS_Exit();
+    car1.PS_SetPwd(bike1.toUInt(argv[2])) ||  PS_Exit();
     g_config.has_password = 1;
-    g_config.password = toUInt(argv[2]);
+    g_config.password = bike1.toUInt(argv[2]);
     if (writeConfig())
       printf("New password is 0x%08x\n", g_as608.password);
   }
 
   else if (match("vfypwd")) {
     checkArgc(3);
-    PS_VfyPwd(toUInt(argv[2])) ||  PS_Exit();
+    car1.PS_VfyPwd(bike1.toUInt(argv[2])) ||  PS_Exit();
     printf("OK!\n");
   }
 
   else if (match("readinf")) {
     checkArgc(3);
     uchar buf[513] = { 0 };
-    PS_ReadINFpage(buf, 512) ||  PS_Exit();
+    car1.PS_ReadINFpage(buf, 512) ||  PS_Exit();
 
     // 写入文件
     FILE* fp = fopen(argv[2], "w+");
@@ -605,7 +604,7 @@ void Executive::analyseArgv(int argc, char* argv[]) {
       }
     }
 
-    PS_WriteNotepad(toInt(argv[2]), buf, 32) ||  PS_Exit();
+    car1.PS_WriteNotepad(bike1.toInt(argv[2]), (uchar*)buf, 32) ||  PS_Exit();
 
     printf("OK\n");
   }
@@ -613,7 +612,7 @@ void Executive::analyseArgv(int argc, char* argv[]) {
   else if (match("readnote")) {
     checkArgc(3);
     uchar buf[33] = { 0 }; 
-    PS_ReadNotepad(toInt(argv[2]), buf, 32) || PS_Exit();
+    car1.PS_ReadNotepad(bike1.toInt(argv[2]), buf, 32) || PS_Exit();
     printf("%s\n", buf);
   }
 
@@ -655,7 +654,7 @@ bool Executive::readConfig() {
   
   // 主目录下的配置文件
   if (access(filename, F_OK) == 0) { 
-    trimSpaceInFile(filename);
+    bike1.trimSpaceInFile(filename);
     fp = fopen(filename, "r");
   }
   else {
@@ -689,11 +688,11 @@ bool Executive::readConfig() {
     
     // 分割字符串，得到key和value
     if (tmp = strtok(line, "="))
-      trim(tmp, key);
+      bike1.trim(tmp, key);
     else
       continue;
     if (tmp = strtok(NULL, "="))
-      trim(tmp, value);
+      bike1.trim(tmp, value);
     else
       continue;
     while (!tmp)
@@ -705,7 +704,7 @@ bool Executive::readConfig() {
       offset = 2;
 
     if (strcmp(key, "address") == 0) {
-      g_config.address = toUInt(value+offset);
+      g_config.address = bike1.toUInt(value+offset);
     }
     else if (strcmp(key, "password") == 0) {
       if (strcmp(value, "none") == 0 || strcmp(value, "false") == 0) {
@@ -713,7 +712,7 @@ bool Executive::readConfig() {
       }
       else {
         g_config.has_password = 1; // 有密码
-        g_config.password = toUInt(value+offset);
+        g_config.password = bike1.toUInt(value+offset);
       }
     }
     else if (strcmp(key, "serial") == 0) {
@@ -723,10 +722,10 @@ bool Executive::readConfig() {
       strcpy(g_config.serial, value);
     }
     else if (strcmp(key, "baudrate") == 0) {
-      g_config.baudrate = toInt(value);
+      g_config.baudrate = bike1.toInt(value);
     }
     else if (strcmp(key, "detect_pin") == 0) {
-      g_config.detect_pin = toInt (value);
+      g_config.detect_pin = bike1.toInt (value);
     }
     else {
       printf("Unknown key:%s\n", key);

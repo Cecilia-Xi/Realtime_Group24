@@ -5,7 +5,7 @@
 int main(int argc, char *argv[]) //int serialOpen (const char *device, const int baud)
 {
 	Executive exe1;
-	exe1.run();
+	exe1.run(argc,argv);
 	
 
 

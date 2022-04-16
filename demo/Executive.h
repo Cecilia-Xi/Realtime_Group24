@@ -30,7 +30,7 @@ class Executive{
 		
 		Executive();
 		~Executive();
-		void run();
+		void run(int argc, char *argv[]);
 
 		void printConfig();
 		void printUsage();
@@ -43,11 +43,12 @@ class Executive{
 		bool waitUntilDetectFinger(int wait_time);   // 阻塞至检测到手指，最长阻塞wait_time毫秒
 		bool waitUntilNotDetectFinger(int wait_time);
 		bool PS_Exit();
-		void atExitFunc();
-		
+		static void atExitFunc();
+		bool checkArgc(int argcNum);
+		bool match(const char* str);
 	private:
-		Car a1;
-		Bike b1;
+		Car car1;
+		Bike bike1;
 	};
 
 #endif // __EXECUTIVE_H__
