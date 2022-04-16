@@ -3,19 +3,16 @@
 
 AS_608 g_as608;
 int   g_fd;          // file char, return when serial opened
-int   g_verbose;     // 输出信息的详细程度
-char  g_error_desc[128]; // 错误代码的含义
-uchar g_error_code;      // 模块返回的确认码，如果函数返回值不为true，读取此变量
+int   g_verbose;     // the details level of output
+char  g_error_desc[128]; // error info
+uchar g_error_code;      // the module return code when function return false
 
-uchar g_order[64] = { 0 }; // 发送给模块的指令包
-uchar g_reply[64] = { 0 }; // 模块的应答包 
+uchar g_order[64] = { 0 }; // the instruction package 
+uchar g_reply[64] = { 0 }; // the reply package
 
 
 /******************************************************************************
- *
- * 第一部分：辅助函数区
- *   该部分的函数仅在本文件作用域内有效，在 as608.h 中没有声明！！！
- *
+* Helper Functions
 ******************************************************************************/
 
 
@@ -370,20 +367,10 @@ int Car::GenOrder(uchar orderCode, const char* fmt, ...) {
   } // end else (count != 0)
 }
 
-Car::Car()
-{
-	
-}
+/******************************************************************************
+* AS608 main Functions
+******************************************************************************/
 
-Car::~Car()
-{
-
-}
-
-void Car::pri()
-{
-	printf("SD");
-}
 
 bool Car::PS_Setup(uint chipAddr, uint password) {
   g_as608.chip_addr = chipAddr;

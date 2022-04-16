@@ -17,18 +17,18 @@ typedef unsigned char uchar;
 typedef unsigned int uint;
 typedef struct AS608_Module_Info
 {
-  uint status;      // 状态寄存器 0
-  uint model;       // 传感器类型 0-15
-  uint capacity;    // 指纹容量，300
-  uint secure_level;    // 安全等级 1/2/3/4/5，默认为3
-  uint packet_size;     // 数据包大小 32/64/128/256 bytes，默认为128
-  uint baud_rate;       // 波特率系数 
-  uint chip_addr;       // 设备(芯片)地址                  
-  uint password;        // 通信密码
-  char product_sn[12];        // 产品型号
-  char software_version[12];  // 软件版本号
-  char manufacture[12];       // 厂家名称
-  char sensor_name[12];       // 传感器名称
+  uint status;      // Status registers 0
+  uint model;       // sencor type 0-15
+  uint capacity;    // fingerprint capacity，300
+  uint secure_level;    // safety level 1/2/3/4/5，default =3 
+  uint packet_size;     // data package size 32/64/128/256 bytes，default = 128
+  uint baud_rate;       // baudrate val 
+  uint chip_addr;                      
+  uint password;        
+  char product_sn[12];        // product module number
+  char software_version[12];  // software edition number
+  char manufacture[12];
+  char sensor_name[12];
 
   uint detect_pin;      // AS608的WAK引脚连接的树莓派GPIO引脚号
   uint has_password;    // 是否有密码
@@ -52,9 +52,8 @@ public:
 
 	
 	/********************Public Functions******************/
-	Car();
-	~Car();
-	void pri();
+	Car(){};
+	~Car(){};
 	bool PS_Setup(uint chipAddr, uint password);       // 0x00000000 ~ 0xffffffff
 	
 	bool PS_GetImage();
@@ -85,7 +84,6 @@ public:
 	bool PS_ValidTempleteNum(int* pValidN);
 	bool PS_ReadIndexTable(int* indexList, int size);
 
-	// 封装函数
 	bool PS_DetectFinger();
 	bool PS_SetBaudRate(int value);
 	bool PS_SetSecureLevel(int level);
@@ -93,32 +91,18 @@ public:
 	bool PS_GetAllInfo();
 	bool PS_Flush();
 
-	// 获得错误代码g_error_code的含义，并赋值给g_error_desc
+	// carry the g_error_code val and return to g_error_desc
 	char* PS_GetErrorDesc();
 	/********************Public Functions End******************/
 private:
 
-	/*
-	 * 辅助函数
-	 * 把一个无符号整数，拆分为多个单字节整数
-	 *    如num=0xa0b1c2d3，拆分为0x0a, 0x1b, 0xc2, 0xd3
-	*/
+	//split unsigned int val into seperate int val
 	void Split(uint num, uchar* buf, int count);
 	
-	/*
-	 * 辅助函数
-	 * 把多个单字节整数(最多4个)，合并为一个unsigned int整数
-	 *      如0xa0, 0xb1, 0xc2, 0xd3, 合并为0xa0b1c2d3
-	 * 参数：num(指针，输出转换结果)
-	 *       startAddr(指针，指向数组某个元素的指针，传参时可使用（数组名+偏移量）表示)
-	 *       count(从startAddr开始，计算将count个数字合并为一个数字，赋值给num)
-	*/
+	//merge multi int val into one unsigned int val
 	bool Merge(uint* num, const uchar* startAddr, int count);
 	
-	/* 
-	 *  辅助函数，debug用
-	 *  打印16进制数据
-	*/
+	// print hex buffer
 	void PrintBuf(const uchar* buf, int size);
 	
 	/*
