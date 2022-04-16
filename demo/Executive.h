@@ -19,14 +19,15 @@ extern int g_verbose;
 extern char  g_error_desc[128];
 extern uchar g_error_code;
 
-int  g_argc = 0;   // 参数个数，g_argc = argc - g_option_count
-int  g_option_count = 0; // 选项个数-v、-h等
-char g_command[16] = { 0 };     // 即argv[1]
-Config g_config;   // 配置文件 结构体，定义在"./utils.h"头文件中
+
 
 class Executive{
 	public:
 
+		int  g_argc = 0;   // 参数个数，g_argc = argc - g_option_count
+		int  g_option_count = 0; // 选项个数-v、-h等
+		char g_command[16] = { 0 };     // 即argv[1]
+		Config g_config;   // 配置文件 结构体，定义在"./utils.h"头文件中
 		
 		Executive();
 		~Executive();
