@@ -47,6 +47,8 @@ class Executive{
 		static void atExitFunc();
 		bool checkArgc(int argcNum);
 		bool match(const char* str);
+		
+		void lockerControl();
 	private:
 		Car car1;
 		Bike bike1;

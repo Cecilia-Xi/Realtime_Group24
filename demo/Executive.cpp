@@ -1,5 +1,5 @@
 #include "Executive.h"
-
+#define SWITCH 7
 Executive::Executive()
 {
 
@@ -8,6 +8,17 @@ Executive::Executive()
 Executive::~Executive()
 {
 	
+}
+void Executive::lockerControl()
+{
+  pinMode (SWITCH,OUTPUT);
+  printf("FBI open The Door!\n");
+  digitalWrite (SWITCH,LOW);//set it initially as high, is closed
+
+  delay(6000);
+  digitalWrite (SWITCH,HIGH);
+
+  pinMode(g_config.detect_pin, INPUT);
 }
 
 void Executive::run(int argc, char *argv[])
@@ -31,12 +42,17 @@ void Executive::run(int argc, char *argv[])
 	// 4.检测是否有手指放上的GPIO端口，设为输入模式
 	pinMode(g_config.detect_pin, INPUT);
 
+  //test the configeration
+  //printConfig();
+
 	// 5.打开串口
 	if((g_fd = serialOpen(g_config.serial, g_config.baudrate)) < 0)	{
+    //std::cout<<"serial "<<g_config.serial<<" baudrate "<<g_config.baudrate<<"\n";
 		fprintf(stderr,"Unable to open serial device: %s\n", strerror(errno));
     exit(0);
 	}
 
+  
 	// 6.注册退出函数(打印一些信息、关闭串口等)
 	atexit(atExitFunc);
 
@@ -190,8 +206,37 @@ bool Executive::waitUntilNotDetectFinger(int wait_time) {
 
 // 主处理函数，解析命令
 void Executive::analyseArgv(int argc, char* argv[]) {
+  if (match("door")) {
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  checkArgc(2);
 
-  if (match("add")) {
+  printf("Please put your finger on the module.\n");
+  delay(2000);
+  car1.PS_GetImage() || PS_Exit();
+  car1.PS_GenChar(1) || PS_Exit();
+
+  int pageID = 0, score = 0;
+  if (!car1.PS_Search(1, 0, 300, &pageID, &score))
+    PS_Exit();
+  else
+  {   
+      //lockerControl();
+      pinMode (SWITCH,OUTPUT);
+      printf("FBI open the door!\n");
+      digitalWrite (SWITCH,LOW);//set it initially as high, is closed
+      
+      delay(6000);
+      digitalWrite (SWITCH,HIGH);
+
+      pinMode(g_config.detect_pin, INPUT);
+  }
+
+  //printf("Matched! pageID=%d score=%d\n", pageID, score);
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  }
+  
+  
+  else if (match("add")) {
     checkArgc(3);
     printf("Please put your finger on the module.\n");
     if (waitUntilDetectFinger(5000)) {
