@@ -105,67 +105,28 @@ private:
 	// print hex buffer
 	void PrintBuf(const uchar* buf, int size);
 	
-	/*
-	 * 辅助函数
-	 * 计算检校和(从buf的第7字节开始计算，一直到倒数第三字节，计算每一字节的数值之和)
-	**/
+	//calculate the check summation
 	int Calibrate(const uchar* buf, int size);
 	
-	/*
-	 * 辅助函数
-	 * 判断确认码 && 计算检校和
-	 * 参数：buf，模块的应答包数据
-	 *     size，应答包的有效字节数
-	*/
+	//Judge the confirmation code && calculate the check summation
 	bool Check(const uchar* buf, int size);
 	
-	/* 
-	 *  辅助函数
-	 *  发送指令包
-	 *  参数，size(实际准备发送的有效字符，不包含结尾的'\0'.  ！！！)
-	*/
+	//send instruction package
 	int SendOrder(const uchar* order, int size);
 	
-	/* 
-	 *  辅助函数
-	 *  接收应答包
-	 *  参数：size(实际准备接收的数据，包括指令头、包长度、数据区、检校和等)
-	 */
+	//recive reply package
 	bool RecvReply(uchar* hex, int size);
 	
-	/*
-	 * 显示进度条
-	 * 参数：done(已完成的量)  all(总量)
-	*/
+	// shoe the process percentage
 	void PrintProcess(int done, int all);
 	
-	/* 
-	 *  辅助函数
-	 *  接收数据包 确认码0x02表示数据包且有后续包，0x08表示最后一个数据包
-	 *  参数：
-	 *     validDataSize表示有效的数据大小，不包括数据头、检校和部分
-	*/
+	//Receive packet Acknowledgment code
 	bool RecvPacket(uchar* pData, int validDataSize);
 	
-	/* 
-	 *  辅助函数
-	 *  发送数据包 确认码0x02表示数据包且有后续包，0x08表示最后一个数据包
-	 *  参数：
-	 *     validDataSize表示有效的数据大小，不包括数据头、检校和部分
-	*/
+	//Send packet Acknowledgment code
 	bool SendPacket(uchar* pData, int validDataSize);
 	
-	/*
-	 * 辅助函数
-	 * 构造指令包，结果赋值给全局变量 g_order
-	 * 参数：
-	 *   orderCode, 指令代码， 如0x01, 0x02, 0x1a...
-	 *   fmt, 参数描述，例如指令包带有2个参数，一个uchar类型，占1个字节，另一个uchar类型，占2个字节
-	 *          那么fmt应为"%1d%2d"。
-	 *      如果参数为一个uchar类型，占1个字节，另一个为uchar*类型，占32个字节
-	 *          那么fmt应为"%d%32s"
-	 *      (数字代表该参数占的字节数，为1则可忽略，字母代表类型, 只支持%d、%u 和 %s)
-	*/
+	//Constructs a directive package, the result of which is assigned to the global variable g_order
 	int GenOrder(uchar orderCode, const char* fmt, ...);
 	
 	

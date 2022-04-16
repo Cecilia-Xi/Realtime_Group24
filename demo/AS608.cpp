@@ -51,18 +51,20 @@ int Car::Calibrate(const uchar* buf, int size) {
 
 
 bool Car::Check(const uchar* buf, int size) {
-  int count_ = 0;       // 模块传来的检校和 
+  //init check sum
+  int count_ = 0; 
   Merge(&count_, buf+size-2, 2); 
 
-  // 自己计算的检校和
+  // sum of check
   int count = Calibrate(buf, size);
-
-  return (buf[9] == 0x00 && count_ == count && buf[0] != 0x00);   // 防止全为0x00
+  
+  //avoid 0x00
+  return (buf[9] == 0x00 && count_ == count && buf[0] != 0x00);
 }
 
 
 int Car::SendOrder(const uchar* order, int size) {
-  // 输出详细信息
+  // print detials info
   if (g_verbose == 1) {
     printf("sent: ");
     PrintBuf(order, size);
@@ -84,20 +86,19 @@ bool Car::RecvReply(uchar* hex, int size) {
         break;
       }
     }
-    usleep(10); // 等待10微秒
+    usleep(10); 
     timeCount++;
-    if (timeCount > 300000) {   // 最长阻塞3秒
+    if (timeCount > 300000) { //if delay >3s
       break;
     }
   }
 
-  // 输出详细信息
   if (g_verbose == 1) {
     printf("recv: ");
     PrintBuf(hex, availCount);
   }
 
-  // 最大阻塞时间内未接受到指定大小的数据，返回false
+  // if no data return within required time
   if (availCount < size) {
     g_error_code = 0xff;
     return false;
@@ -401,26 +402,12 @@ bool Car::PS_Setup(uint chipAddr, uint password) {
 bool Car::PS_GetImage() {
   int size = GenOrder(0x01, "");
 
-  // 检测是否有指纹
-  //for (int i = 0; i < 100000; ++i) {
-  //  if (digitalRead(g_as608.detect_pin) == HIGH) {
-  //    delay(1000);
-  //    printf("Sending order.. \n");
-  
   // 发送指令包
   SendOrder(g_order, size);
 
   // 接收应答包，核对确认码和检校和
   return (RecvReply(g_reply, 12) && Check(g_reply, 12));
 
-  //}
-  // 100*100000=10e6微秒，即10秒
-  // 如果10秒内，没有检测到指纹，返回false
-  //  usleep(100);
-  // }
-
-  //g_error_code = 0x02;  // 传感器上没有手指
-  //return false;
 }
 
 
@@ -645,22 +632,6 @@ bool Car::PS_DownImage(const char* filename) {
   }
   fclose(fp);
 
-  //FILE* fpx = fopen("temp.bmp", "wb");
-  //if (!fpx) {
-  //  printf("Error\n");
-  //  return false;
-  //}
-  //fwrite(imageBuf, 1, 74806, fpx);
-  //fclose(fpx);
-  //return true;
-
-  //uchar dataBuf[128*288] = { 0 };
-  //for (uint i = 0, size=128*288; i < size; ++i) {
-  //  dataBuf[i] = imageBuf[1078 + i*2] + (imageBuf[1078 + i*2 + 1] >> 4);
-  //}
-
-  // 发送图像的像素数据，偏移量54+1024=1078，大小128*256*2=73728
-  //return SendPacket(dataBuf, 128*288);
   return SendPacket(imageBuf+1078, 73728);
 }
 
