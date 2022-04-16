@@ -30,17 +30,17 @@ typedef struct AS608_Module_Info
   char manufacture[12];
   char sensor_name[12];
 
-  uint detect_pin;      // AS608的WAK引脚连接的树莓派GPIO引脚号
-  uint has_password;    // 是否有密码
+  uint detect_pin;      // AS608 WAK pins with raspi gpios
+  uint has_password;  
 } AS_608;
 /********************type construct end******************/
 
 /********************Global Variables******************/
 extern AS_608 g_as608;
-extern int   g_fd;          // 文件描述符，即open()函数打开串口的返回值
-extern int   g_verbose;     // 输出信息的详细程度
-extern char  g_error_desc[128]; // 错误代码的含义
-extern uchar g_error_code;      // 模块返回的确认码，如果函数返回值不为true，读取此变量
+extern int   g_fd; 
+extern int   g_verbose;
+extern char  g_error_desc[128];
+extern uchar g_error_code;
 
 /********************Global Variables ENd******************/
 
