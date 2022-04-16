@@ -19,18 +19,16 @@ class Bike
 		Bike(){};
 		~Bike(){};
 
-
-
-		// 去除文件中所有空白字符(空格和制表符)
+		//remove all the white space in file
 		void trimSpaceInFile(const char* filename);
-
-		// 把字符串转为整型
+		
+		// remove spave and '\n' in string
 		void trim(const char* strIn, char* strOut);
-
-		// 把字符串转为整型
+		
+		//convert string to int
 		int toInt(const char* str);
 
-		// 把 *十六进制* 字符串转为无符号整型
+		//convert Hexadecimal char* to unit
 		unsigned int toUInt(const char* str);
 
 	private:
