@@ -110,13 +110,13 @@ bool Car::RecvReply(uchar* hex, int size) {
 
 
 void Car::PrintProcess(int done, int all) {
-  // 进度条，0~100%，50个字符
+  // progress bar showing as 0~100%，50 chars
   char process[64] = { 0 };
   double stepSize = (double)all / 100;
   int doneStep = done / stepSize;
   
-  // 如果步数是偶数，更新进度条
-  // 因为用50个字符显示100个进度值
+  // update the progress bar if the step is even 
+  // 50 chars used to display 100 the value of prgress 
   for (int i = 0; i < doneStep / 2 - 1; ++i)
     process[i] = '=';
   process[doneStep/2 - 1] = '>';
@@ -132,11 +132,11 @@ void Car::PrintProcess(int done, int all) {
 bool Car::RecvPacket(uchar* pData, int validDataSize) {
   if (g_as608.packet_size <= 0)
     return false;
-  int realPacketSize = 11 + g_as608.packet_size; // 实际每个数据包的大小
-  int realDataSize = validDataSize * realPacketSize / g_as608.packet_size;  // 总共需要接受的数据大小
+  int realPacketSize = 11 + g_as608.packet_size; // how big every datapacks are in reality
+  int realDataSize = validDataSize * realPacketSize / g_as608.packet_size;  // how big datapacks received totally
 
-  uchar readBufTmp[8] = { 0 };  // 每次read至多8个字节，追加到readBuf中
-  uchar* readBuf = (uchar*)malloc(realPacketSize); // 收满realPacketSize字节，说明收到了一个完整的数据包，追加到pData中
+  uchar readBufTmp[8] = { 0 };  // read 8 chars every time at most, implus to readBuf
+  uchar* readBuf = (uchar*)malloc(realPacketSize); // receiving full chars of realPacketSize means receiving a whole datapack, superadd into pData
 
   int availSize      = 0;
   int readSize       = 0;
@@ -164,20 +164,20 @@ bool Car::RecvPacket(uchar* pData, int validDataSize) {
       readBufSize += readSize;
       readCount   += readSize;
 
-      // 是否输出详细信息
+      // export detailed message or not 
       if (g_verbose == 1) {
         printf("%2d%% RecvData: %d  count=%4d/%-4d  ", 
             (int)((double)readCount/realDataSize*100), readSize, readCount, realDataSize);
         PrintBuf(readBufTmp, readSize);
       }
-      else if (g_verbose == 0){ // 默认显示进度条
+      else if (g_verbose == 0){ // dispaly progress bar acquiescently
         PrintProcess(readCount, realDataSize);
       }
       else {
         // show nothing
       }
 
-      // 接收完一个完整的数据包(139 bytes)
+      // receive a whole datapack(139 bytes)
       if (readBufSize >= realPacketSize) {
         int count_ = 0;
         Merge((uint*)&count_, readBuf+realPacketSize-2, 2);
@@ -191,13 +191,13 @@ bool Car::RecvPacket(uchar* pData, int validDataSize) {
         offset += g_as608.packet_size;
         readBufSize = 0;
 
-        // 收到 结束包
+        // received and terminate the pack 
         if (readBuf[6] == 0x08) {
           break;
         }
       }
 
-      // 接受到 validDataSize 个字节的有效数据，但仍未收到结束包，
+      // received the effective chars of validDataSize, but haven't receive the ending datapack 
       if (readCount >= realDataSize) {
         free(readBuf);
         g_error_code = 0xC4;
@@ -205,16 +205,16 @@ bool Car::RecvPacket(uchar* pData, int validDataSize) {
       }
     } // end outer if
 
-    usleep(10); // 等待10微秒
+    usleep(10); // wait for 10 um 
     timeCount++;
-    if (timeCount > 300000) {   // 最长阻塞3秒
+    if (timeCount > 300000) {   // block up to 3 seconds 
       break;
     }
   } // end while
 
   free(readBuf);
 
-  // 最大阻塞时间内未接受到指定大小的数据，返回false
+  // haven't recive the appointed size fa data within the maximum blocking time, return false
   if (readCount < realDataSize) {
     g_error_code = 0xC3;
     return false;
@@ -233,46 +233,46 @@ bool Car::SendPacket(uchar* pData, int validDataSize) {
     g_error_code = 0xC8;
     return false;
   }
-  int realPacketSize = 11 + g_as608.packet_size; // 实际每个数据包的大小
-  int realDataSize = validDataSize * realPacketSize / g_as608.packet_size;  // 总共需要发送的数据大小
+  int realPacketSize = 11 + g_as608.packet_size; // the size of every datapack in reality 
+  int realDataSize = validDataSize * realPacketSize / g_as608.packet_size;  // the total size of data to be sent 
 
-  // 构造数据包
+  // construct datapack 
   uchar* writeBuf = (uchar*)malloc(realPacketSize);
-  writeBuf[0] = 0xef;  // 包头
-  writeBuf[1] = 0x01;  // 包头
-  Split(g_as608.chip_addr, writeBuf+2, 4);  // 芯片地址
-  Split(g_as608.packet_size+2, writeBuf+7, 2);  // 包长度
+  writeBuf[0] = 0xef;  // the begining of datapack 
+  writeBuf[1] = 0x01;  // the begining of datapack
+  Split(g_as608.chip_addr, writeBuf+2, 4);  // the address of chip 
+  Split(g_as608.packet_size+2, writeBuf+7, 2);  // the length of datapack
 
-  int offset     = 0;  // 已发送的有效数据
-  int writeCount = 0;  // 已发送的实际数据
+  int offset     = 0;  // valid data sent
+  int writeCount = 0;  // factual data sent
 
   while (true) {
-    // 填充数据区域
+    // fill the data zone 
     memcpy(writeBuf+9, pData+offset, g_as608.packet_size);
 
-    // 数据包 标志
+    // datapack symbol 
     if (offset + g_as608.packet_size < (uint)validDataSize)
-      writeBuf[6] = 0x02;  // 结束包(最后一个数据包)
+      writeBuf[6] = 0x02;  // ending pack(the final datapack)
     else
-      writeBuf[6] = 0x08;  // 普通数据包
+      writeBuf[6] = 0x08;  // general datapack 
 
-    // 检校和
+    // verify the sum
     Split(Calibrate(writeBuf, realPacketSize), writeBuf+realPacketSize-2, 2); 
 
-    // 发送数据包
+    // send datapack
     write(g_fd, writeBuf, realPacketSize);
 
     offset     += g_as608.packet_size;
     writeCount += realPacketSize;
 
-    // 是否输出详细信息
+    // export detailed message or not 
     if (g_verbose == 1) {
       printf("%2d%% SentData: %d  count=%4d/%-4d  ", 
           (int)((double)writeCount/realDataSize*100), realPacketSize, writeCount, realDataSize);
       PrintBuf(writeBuf, realPacketSize);
     }
     else if (g_verbose == 0) {
-      // 显示进度条
+      // dispaly the prpgress bar 
       PrintProcess(writeCount, realDataSize);
     }
     else {
@@ -289,13 +289,13 @@ bool Car::SendPacket(uchar* pData, int validDataSize) {
 }
 
 int Car::GenOrder(uchar orderCode, const char* fmt, ...) {
-  g_order[0] = 0xef;        // 包头，0xef
+  g_order[0] = 0xef;        // the begining of pack，0xef
   g_order[1] = 0x01;
-  Split(g_as608.chip_addr, g_order+2, 4);    // 芯片地址，需要使用PS_Setup()初始化设置
-  g_order[6] = 0x01;        // 包标识，0x01代表是指令包，0x02数据包，0x08结束包(最后一个数据包)
-  g_order[9] = orderCode;   // 指令
+  Split(g_as608.chip_addr, g_order+2, 4);    // the address of chip, PS_Setup() is needed to initial setup 
+  g_order[6] = 0x01;        // the symbol of pack，0x01 stands for the command pack，0x02 datapack ，0x08 is ending(final) pack 
+  g_order[9] = orderCode;   // command
 
-  // 计算 参数总个数
+  // calculate the total number of parameters 
   int count = 0;
   for (const char* p = fmt; *p; ++p) {
     if (*p == '%')
@@ -304,8 +304,8 @@ int Car::GenOrder(uchar orderCode, const char* fmt, ...) {
 
   // fmt==""
   if (count == 0) { 
-    Split(0x03, g_order+7,  2);  // 包长度
-    Split(Calibrate(g_order, 0x0c), g_order+10, 2);  // 检校和(如果不带参数，指令包长度为12，即0x0c)
+    Split(0x03, g_order+7,  2);  // the length of pack 
+    Split(Calibrate(g_order, 0x0c), g_order+10, 2);  // verify the sum(the length pf pack should be 12(0x0c) if without parameters
     return 0x0c;
   }
   else {
@@ -316,16 +316,16 @@ int Car::GenOrder(uchar orderCode, const char* fmt, ...) {
     uchar ucharVal;
     uchar* strVal;
 
-    int offset = 10;  // g_order指针偏移量
-    int width = 1;    // fmt中修饰符的宽度，如%4d, %32s
+    int offset = 10;  // the offset of pin g_order
+    int width = 1;    // the width of modifier in fmt，such as:%4d, %32s
 
-    // 处理不定参数
+    // dispose the uncertain parameters 
     for (; *fmt; ++fmt) {
       width = 1;
       if (*fmt == '%') {
         const char* tmp = fmt+1;
 
-        // 获取宽度，如 %4u, %32s
+        // obtain the width, such as: %4u, %32s
         if (*tmp >= '0' && *tmp <= '9') {
           width = 0;
           do {
@@ -342,7 +342,7 @@ int Car::GenOrder(uchar orderCode, const char* fmt, ...) {
             uintVal = va_arg(ap, int);
             Split(uintVal, g_order+offset, width);
             break;
-          case 'c': // 等价于"%d"
+          case 'c': // equal to "%d"
             if (width > 1)
               return 0;
             ucharVal = va_arg(ap, int);
@@ -360,8 +360,8 @@ int Car::GenOrder(uchar orderCode, const char* fmt, ...) {
       } // end if (*p == '%')
     } // end for 
 
-    Split(offset+2-9, g_order+7, 2);  // 包长度
-    Split(Calibrate(g_order, offset+2), g_order+offset, 2); // 检校和
+    Split(offset+2-9, g_order+7, 2);  // the length of pack
+    Split(Calibrate(g_order, offset+2), g_order+offset, 2); // verify the sum
     
     va_end(ap);
     return offset + 2;
@@ -379,13 +379,13 @@ bool Car::PS_Setup(uint chipAddr, uint password) {
 
   if (g_verbose == 1)
     printf("-------------------------Initializing-------------------------\n");
-  //验证密码
+  //verify the password 
   if (g_as608.has_password) {
     if (!PS_VfyPwd(password))
      return false;
   }
 
-  // 获取数据包大小、波特率等
+  // obtain the size of datapack and the baud rate ec.
   if (PS_ReadSysPara() && g_as608.packet_size > 0) {
     if (g_verbose == 1)
       printf("-----------------------------Done-----------------------------\n");
@@ -402,10 +402,10 @@ bool Car::PS_Setup(uint chipAddr, uint password) {
 bool Car::PS_GetImage() {
   int size = GenOrder(0x01, "");
 
-  // 发送指令包
+  // send the command pack 
   SendOrder(g_order, size);
 
-  // 接收应答包，核对确认码和检校和
+  // receive the response pack, check the comfirmation pack and verify sum 
   return (RecvReply(g_reply, 12) && Check(g_reply, 12));
 
 }
@@ -415,7 +415,7 @@ bool Car::PS_GenChar(uchar bufferID) {
   int size = GenOrder(0x02, "%d", bufferID);
   SendOrder(g_order, size);
 
-  // 接收应答包，核对确认码和检校和
+  // receive the response pack, check the comfirmation pack and verify sum 
   return (RecvReply(g_reply, 12) && Check(g_reply, 12));
 }
 
@@ -423,7 +423,7 @@ bool Car::PS_Match(int* pScore) {
   int size = GenOrder(0x03, "");
   SendOrder(g_order, size);
 
-  // 接收应答包，核对确认码和检校和
+  //  receive the response pack, check the comfirmation pack and verify sum 
   return (RecvReply(g_reply, 14) && 
           Check(g_reply, 14) &&
           Merge((uint*)pScore, g_reply+10, 2));
@@ -434,11 +434,11 @@ bool Car::PS_Search(uchar bufferID, int startPageID, int count, int* pPageID, in
   int size = GenOrder(0x04, "%d%2d%2d", bufferID, startPageID, count);
   SendOrder(g_order, size);
 
-  // 接收应答包，核对确认码和检校和
+  // receive the response pack, check the comfirmation pack and verify sum 
   return ( RecvReply(g_reply, 16) && 
            Check(g_reply, 16) && 
-           (Merge((uint*)pPageID, g_reply+10, 2)) &&  // 给pageID赋值，返回true
-           (Merge((uint*)pScore,  g_reply+12, 2))     // 给score赋值，返回true
+           (Merge((uint*)pPageID, g_reply+10, 2)) &&  // assign value to pageID, return true
+           (Merge((uint*)pScore,  g_reply+12, 2))     // assign value to score, return true
         );
 }
 
@@ -446,7 +446,7 @@ bool Car::PS_RegModel() {
   int size = GenOrder(0x05, "");
   SendOrder(g_order, size);
 
-  // 接收应答包，核对确认码和检校和
+  // receive the response pack, check the comfirmation pack and verify sum 
   return (RecvReply(g_reply, 12) &&
       Check(g_reply, 12));
 }
@@ -456,7 +456,7 @@ bool Car::PS_StoreChar(uchar bufferID, int pageID) {
   int size = GenOrder(0x06, "%d%2d", bufferID, pageID);
   SendOrder(g_order, size);
 
-  // 接收应答包，核对确认码和检校和
+  // receive the response pack, check the comfirmation pack and verify sum 
   return (RecvReply(g_reply, 12) && 
         Check(g_reply, 12));
 }
@@ -466,7 +466,7 @@ bool Car::PS_LoadChar(uchar bufferID, int pageID) {
   int size = GenOrder(0x07, "%d%2d", bufferID, pageID);
   SendOrder(g_order, size);
 
-  // 接收应答包，核对确认码和检校和
+  // receive the response pack, check the comfirmation pack and verify sum 
   return (RecvReply(g_reply, 12) &&
          Check(g_reply, 12));
 }
@@ -476,18 +476,18 @@ bool Car::PS_UpChar(uchar bufferID, const char* filename) {
   int size = GenOrder(0x08, "%d", bufferID);
   SendOrder(g_order, size);
 
-  // 接收应答包，核对确认码和检校和
+  // receive the response pack, check the comfirmation pack and verify sum 
   if (!(RecvReply(g_reply, 12) && Check(g_reply, 12))) {
     return false;
   }
 
-  // 接收数据包，将有效数据存储到 pData 中
+  // receive datapack and restore the effective data into pData 
   uchar pData[768] = { 0 };
   if (!RecvPacket(pData, 768)) {
     return false;
   }
 
-  // 写入文件
+  // wirte into file 
   FILE* fp = fopen(filename, "w+");
   if (!fp) { 
     g_error_code = 0xC2;
@@ -502,22 +502,22 @@ bool Car::PS_UpChar(uchar bufferID, const char* filename) {
 
 
 bool Car::PS_DownChar(uchar bufferID, const char* filename) {
-  // 发送指令
+  // send command 
   int size = GenOrder(0x09, "%d", bufferID);
   SendOrder(g_order, size);
 
-  // 接收应答包，如果确认码为0x00，说明可以发送后续数据包
+  // receive response pack, the subsequent datapack can be sent if the confirmation is 0x00
   if ( !(RecvReply(g_reply, 12) && Check(g_reply, 12)) )
     return false;
 
-  // 打开本地文件
+  // open local file 
   FILE* fp = fopen(filename, "rb");
-  if (!fp) {
+  if (!fp) { 
     g_error_code = 0xC2;
     return false;
   }
 
-  // 获取文件大小
+  // obtain the file size 
   int fileSize = 0;
   fseek(fp, 0, SEEK_END);
   fileSize = ftell(fp);
@@ -528,13 +528,13 @@ bool Car::PS_DownChar(uchar bufferID, const char* filename) {
     return false;
   }
 
-  // 读取文件内容
+  // read the content of file 
   uchar charBuf[768] = { 0 };
   fread(charBuf, 1, 768, fp);
 
   fclose(fp);
 
-  // 发送数据包
+  // send datapack 
   return SendPacket(charBuf, 768);
 }
 
@@ -543,32 +543,32 @@ bool Car::PS_UpImage(const char* filename) {
   int size = GenOrder(0x0a, "");
   SendOrder(g_order, size);
 
-  // 接收应答包，核对确认码和检校和
+  // receive the response pack, check the comfirmation pack and verify sum
   if (!(RecvReply(g_reply, 12) && Check(g_reply, 12))) {
     return false;
   }
 
-  // 接收数据包，将有效数据存储到 pData 中
-  // 图像尺寸 128*288 = 36864
+  // receive datapack and restore the effective data into pData 
+  // the size of picture 128*288 = 36864
   uchar* pData = (uchar*)malloc(36864);
   if (!RecvPacket(pData, 36864)) {
     return false;
   }
 
-  // 将pData写入文件中
+  // wirte pData into file 
   FILE* fp = fopen(filename, "w+");
   if (!fp) {
     g_error_code = 0xC2;
     return false;
   }
 
-  // 构造bmp头(对该模块而言，是固定的)
+  // construct the begining of bmp (it's fixed for this module)
   uchar header[54] = "\x42\x4d\x00\x00\x00\x00\x00\x00\x00\x00\x36\x04\x00\x00\x28\x00\x00\x00\x00\x01\x00\x00\x20\x01\x00\x00\x01\x00\x08";
   for (int i = 29; i < 54; ++i)
     header[i] = 0x00;
   fwrite(header, 1, 54, fp);
 
-  // 调色板
+  // pallet
   uchar palette[1024] = { 0 };
   for (int i = 0; i < 256; ++i) {
     palette[4*i]   = i;
@@ -578,7 +578,7 @@ bool Car::PS_UpImage(const char* filename) {
   }
   fwrite(palette, 1, 1024, fp);
 
-  // bmp像素数据
+  // the pixel data of bmp
   uchar* pBody = (uchar*)malloc(73728);
   for (int i = 0; i < 73728; i += 2) {
     pBody[i] = pData[i/2] & 0xf0;  
@@ -604,7 +604,7 @@ bool Car::PS_DownImage(const char* filename) {
   if (!RecvReply(g_reply, 12) && Check(g_reply, 12))
     return false;
 
-  // 指纹图像文件大小 748069 bytes
+  // the file size of fingerprint picture is 748069 bytes
   uchar imageBuf[74806] = { 0 };
 
   FILE* fp = fopen(filename, "rb");
@@ -613,18 +613,18 @@ bool Car::PS_DownImage(const char* filename) {
     return false;
   }
 
-  // 获取图像文件大小
+  // obtain the size of picture file
   int imageSize = 0;
   fseek(fp, 0, SEEK_END);
   imageSize = ftell(fp);
   rewind(fp);
-  if (imageSize != 74806) { // 指纹图像大小 必须为74806kb
+  if (imageSize != 74806) { // the size of fingerprint should be 74806kb
     g_error_code = 0xC9;
     fclose(fp);
     return false;
   }
 
-  // 读文件
+  // read file
   if (fread(imageBuf, 1, 74806, fp) != 74806) {
     g_error_code = 0xCA;
     fclose(fp);
@@ -641,7 +641,7 @@ bool Car::PS_DeleteChar(int startPageID, int count) {
   int size = GenOrder(0x0c, "%2d%2d", startPageID, count);
   SendOrder(g_order, size);
 
-  // 接收数据，核对确认码和检校和
+  // receive data, verify the confirmation code and the sum 
   return (RecvReply(g_reply, 12) &&
          Check(g_reply, 12));
 }
@@ -651,7 +651,7 @@ bool Car::PS_Empty() {
   int size = GenOrder(0x0d, "");
   SendOrder(g_order, size);
 
-  // 接收数据，核对确认码和检校和
+  // receive data, verify the confirmation code and the sum 
   return (RecvReply(g_reply, 12) && Check(g_reply, 12));
 }
 
@@ -665,17 +665,17 @@ bool Car::PS_WriteReg(int regID, int value) {
   int size = GenOrder(0x0e, "%d%d", regID, value);
   SendOrder(g_order, size);
 
-  // 接收数据，核对确认码和检校和
+  // receive data, verify the confirmation code and the sum 
   return (RecvReply(g_reply, 12) && Check(g_reply, 12));
 }
 
 /*
- * 函数名称：PS_ReadSysPara
- * 说明：读取模块的基本参数（波特率，包大小等）。
- * 参数：none(参数保存到g_as608.chip_addr, g_as608.packet_size, PS_BPS等系统变量中)
- * 返回值 ：true(成功)，false(出现错误)，确认码赋值给g_error_code
- *   确认码=00H 表示 OK；
- *   确认码=01H 表示收包有错；
+ * funtion name: PS_ReadSysPara
+ * description：reads the basic parameters of as608(baud rate，pack size ec.）
+ * parameter：none(saved at the system variable of g_as608.chip_addr, g_as608.packet_size, PS_BPS ec.)
+ * return value ：true(sucessful)，false(error accurred)，assign the confirmation code to g_error_code
+ *   confirmation code =00H means OK；
+ *   confirmation code =01H means error accurred in receiving pack；
 */
 bool Car::PS_ReadSysPara() {
   int size = GenOrder(0x0f, "");
@@ -700,7 +700,7 @@ bool Car::PS_Enroll(int* pPageID) {
   int size = GenOrder(0x10, "");
   SendOrder(g_order, size);
 
-  // 接收数据，核对确认码和检校和
+  // receive data, verify the confirmation code and the sum
   return (RecvReply(g_reply, 14) &&
           Check(g_reply, 14) &&
           Merge((uint*)pPageID, g_reply+10, 2)
@@ -712,7 +712,7 @@ bool Car::PS_Identify(int* pPageID, int* pScore) {
   int size = GenOrder(0x11, "");
   SendOrder(g_order, size);
 
-  // 接收数据，核对确认码和检校和
+  // receive data, verify the confirmation code and the sum
   return (RecvReply(g_reply, 16) &&
           Check(g_reply, 16) &&
           Merge((uint*)pPageID, g_reply+10, 2) &&
@@ -725,7 +725,7 @@ bool Car::PS_SetPwd(uint pwd) {   // 0x00 ~ 0xffffffff
   int size  = GenOrder(0x12, "%4d", pwd);
   SendOrder(g_order, size);
 
-  // 接收数据，核对确认码和检校和
+  // receive data, verify the confirmation code and the sum
   return (RecvReply(g_reply, 12) && 
           Check(g_reply, 12) &&
           (g_as608.has_password = 1) &&
@@ -737,7 +737,7 @@ bool Car::PS_VfyPwd(uint pwd) {
   int size = GenOrder(0x13, "%4d", pwd); 
   SendOrder(g_order, size);
 
-  // 接收数据，核对确认码和检校和
+  // receive data, verify the confirmation code and the sum
   return (RecvReply(g_reply, 12) && Check(g_reply, 12));
 }
 
@@ -746,7 +746,7 @@ bool Car::PS_GetRandomCode(uint* pRandom) {
   int size = GenOrder(0x14, "");
   SendOrder(g_order, size);
 
-  // 接收数据，核对确认码和检校和
+  // receive data, verify the confirmation code and the sum
   return (RecvReply(g_reply, 16) &&
           Check(g_reply, 16) &&
           Merge((uint*)pRandom, g_reply+10, 4)
@@ -758,10 +758,10 @@ bool Car::PS_SetChipAddr(uint addr) {
   int size = GenOrder(0x15, "%4d", addr);
   SendOrder(g_order, size);
 
-  // 接收数据，核对确认码和检校和
+  // receive data, verify the confirmation code and the sum
   return (RecvReply(g_reply, 12) && 
           Check(g_reply, 12) && 
-          ((g_as608.chip_addr = addr) || true)); // 防止addr=0x00
+          ((g_as608.chip_addr = addr) || true)); // avoid addr=0x00
 }
 
 
@@ -774,11 +774,11 @@ bool Car::PS_ReadINFpage(uchar* pInfo, int pInfoSize/*>=512*/) {
   int size = GenOrder(0x16, "");
   SendOrder(g_order, size);
 
-  // 接收应答包
+  // receive response pack 
   if (!(RecvReply(g_reply, 12) && Check(g_reply, 12))) 
     return false;
 
-  // 接收数据包
+  // receive datapack
   if (!RecvPacket(pInfo, 512))
     return false;
   
@@ -797,7 +797,7 @@ bool Car::PS_WriteNotepad(int notePageID, uchar* pContent, int contentSize) {
     return false;
   }
 
-  pContent[32] = 0; // 字符串结束符
+  pContent[32] = 0; // ending of the string
   int size = GenOrder(0x18, "%d%32s", notePageID, pContent);
   SendOrder(g_order, size);
 
@@ -814,7 +814,7 @@ bool Car::PS_ReadNotepad(int notePageID, uchar* pContent, int contentSize) {
   int size = GenOrder(0x19, "%d", notePageID);
   SendOrder(g_order, size);
 
-  // 接收应答包，核对确认码和检校和
+  // receive data, verify the confirmation code and the sum
   if (!(RecvReply(g_reply, 44) && Check(g_reply, 44)))
     return false;
 
@@ -827,11 +827,11 @@ bool Car::PS_HighSpeedSearch(uchar bufferID, int startPageID, int count, int* pP
   int size = GenOrder(0x1b, "%d%2d%2d", bufferID, startPageID, count);
   SendOrder(g_order, size);
 
-  // 接收数据，核对确认码和检校和
+  // receive data, verify the confirmation code and the sum
   return ( RecvReply(g_reply, 16) && 
            Check(g_reply, 16) && 
-           (Merge((uint*)pPageID, g_reply+10, 2)) &&  // 给pageID赋值，返回true
-           (Merge((uint*)pScore,  g_reply+12, 2))     // 给score赋值，返回true
+           (Merge((uint*)pPageID, g_reply+10, 2)) &&  // assign value to pageID，return true
+           (Merge((uint*)pScore,  g_reply+12, 2))     // assign value to score，return true
         );
 }
 
@@ -840,7 +840,7 @@ bool Car::PS_ValidTempleteNum(int* pValidN) {
   int size = GenOrder(0x1d, "");
   SendOrder(g_order, size);
 
-  // 接收数据，核对确认码和检校和
+  // receive data, verify the confirmation code and the sum
   return (RecvReply(g_reply, 14) &&
           Check(g_reply, 14) &&
           Merge((uint*)pValidN, g_reply+10, 2)
@@ -849,18 +849,18 @@ bool Car::PS_ValidTempleteNum(int* pValidN) {
 
 
 bool Car::PS_ReadIndexTable(int* indexList, int size) {
-  // 将indexList所有元素初始化为-1
+  // Initialize all elements of indexList to -1
   for (int i = 0; i < size; ++i)
     indexList[i] = -1;
 
   int nIndex = 0;
 
   for (int page = 0; page < 2; ++page) {
-    // 发送数据（两次，每页256个指纹模板，需要请求两页），
+    // send data（twice，256 fingerprint modules at every page which needs 2 page's request），
     int size = GenOrder(0x1f, "%d", page);
     SendOrder(g_order, size);
 
-    // 接收数据，核对确认码和检校和
+    // receive data, verify the confirmation code and the sum
     if (!(RecvReply(g_reply, 44) && Check(g_reply, 44)))
       return false;
 
@@ -868,7 +868,7 @@ bool Car::PS_ReadIndexTable(int* indexList, int size) {
       for (int j = 0; j < 8; ++j) {
         if ( ( (g_reply[10+i] & (0x01 << j) ) >> j) == 1 ) {
           if (nIndex > size) {
-            g_error_code = 0xC1;    // 数组太小
+            g_error_code = 0xC1;    // array is too samll 
             return false;
           }
           indexList[nIndex++] = page*256 + 8 * i + j;
@@ -883,7 +883,7 @@ bool Car::PS_ReadIndexTable(int* indexList, int size) {
   return true;
 }
 
-// 封装函数
+// wrapper function
 
 bool Car::PS_DetectFinger() {
   return digitalRead(g_as608.detect_pin) == HIGH;
@@ -937,7 +937,7 @@ bool Car::PS_Flush()
   return false;
 }
 
-// 获得错误代码g_error_code的含义，并赋值给g_error_desc
+// obtain the defination of error code of g_error_code and assign value to g_error_desc
 char* Car::PS_GetErrorDesc()
 {
 	switch (g_error_code) {
