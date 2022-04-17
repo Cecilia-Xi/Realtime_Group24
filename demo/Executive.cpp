@@ -23,29 +23,29 @@ void Executive::lockerControl()
 
 void Executive::run(int argc, char *argv[])
 {
-	// 1.读取配置文件，获得芯片地址和通信密码
+	// 1.read configuration files, obtain the chip address and the signal password 
 	if (!readConfig())
 		exit(1);
 
-	// 2.优先解析的内容，如参数选项、配置本地文件等
+	// 2.priorify analysis content such as parameters options and allocate local files 
 	priorAnalyseArgv(argc, argv);
 
 	if (g_verbose == 1)
 		printConfig();
 
-	// 3.初始化wiringPi库
+	// 3.initialize wiringPi library
 	if (-1 == wiringPiSetup()) {
 		printf("wiringPi setup failed!\n");
     exit(0);
 	}
 
-	// 4.检测是否有手指放上的GPIO端口，设为输入模式
+	// 4.Detect if there is a GPIO port on which a finger is placed, and set it to input mode
 	pinMode(g_config.detect_pin, INPUT);
 
   //test the configeration
   //printConfig();
 
-	// 5.打开串口
+	// 5.Open serial port
 	if((g_fd = serialOpen(g_config.serial, g_config.baudrate)) < 0)	{
     //std::cout<<"serial "<<g_config.serial<<" baudrate "<<g_config.baudrate<<"\n";
 		fprintf(stderr,"Unable to open serial device: %s\n", strerror(errno));
@@ -53,19 +53,18 @@ void Executive::run(int argc, char *argv[])
 	}
 
   
-	// 6.注册退出函数(打印一些信息、关闭串口等)
+	// 6.Register the exit function (print some information, close the serial port, etc.)
 	atexit(atExitFunc);
 
-	// 7.初始化 AS608 模块
-	// 地址 密码
+	// 7.initialize AS608 module 
 	car1.PS_Setup(g_config.address, g_config.password) ||  PS_Exit();
 
-	// 8.主处理函数，解析普通命令(argv[1])，
+	// 8.dispose main funtion and analysis general commands (argv[1])，
 	analyseArgv(argc, argv);
 
 }
 	
-// 因为as608.h内的函数执行失败而退出程序
+//The program exited because the function in as608.h failed to execute
 bool Executive::PS_Exit()
 {
   printf("ERROR! code=%02X, desc=%s\n", g_error_code, car1.PS_GetErrorDesc());
@@ -73,7 +72,7 @@ bool Executive::PS_Exit()
   return true;
 }
 
-// 程序退出时执行的工作，关闭串口等
+// The work performed when the program exits, closing the serial port, etc.
 void Executive::atExitFunc()
 {
   if (g_verbose == 1)
@@ -84,7 +83,7 @@ void Executive::atExitFunc()
 
 
 
-// 检查参数数量是否正确是否
+// Check if the number of parameters is correct
 bool Executive::checkArgc(int argcNum) {
   if (argcNum == g_argc)
     return true;
@@ -98,20 +97,20 @@ bool Executive::checkArgc(int argcNum) {
   exit(1);
 }
 
-// 匹配argv[1], 即g_command
+// matching argv[1], that is g_command
 bool Executive::match(const char* str) {
   return strcmp(str, g_command) == 0;
 }
 
-// 需要优先解析的命令，如配置文件的修改、选项解析等
-// 不需要与模块通信
+// Commands that need to be parsed first, such as configuration file modification, option parsing, etc.
+// No need to communicate with the module
 void Executive::priorAnalyseArgv(int argc, char* argv[]) {
   if (argc < 2) {
     printUsage();
     exit(1);
   }
 
-  // 检查选项  -v -h
+  // check options  -v -h
   for (int i = 0; i < argc; ++i) {
     if (strcmp(argv[i], "-h") == 0) {
       printUsage();
@@ -132,7 +131,7 @@ void Executive::priorAnalyseArgv(int argc, char* argv[]) {
     exit(0);
   }
 
-  // 配置通信地址
+  // allocate communication address
   else if (match("cfgaddr")) {
     checkArgc(3);
     g_config.address = bike1.toUInt(argv[2]);
@@ -140,7 +139,7 @@ void Executive::priorAnalyseArgv(int argc, char* argv[]) {
     exit(0);
   }
 
-  // 配置通信密码
+  // allocate communication password
   else if (match("cfgpwd")) {
     checkArgc(3);
     g_config.password = bike1.toUInt(argv[2]);
@@ -149,7 +148,7 @@ void Executive::priorAnalyseArgv(int argc, char* argv[]) {
     exit(0);
   }
 
-  // 配置串口号
+  // allocate serial port number
   else if (match("cfgserial")) {
     checkArgc(3);
     strcpy(g_config.serial, argv[2]);
@@ -172,7 +171,7 @@ void Executive::priorAnalyseArgv(int argc, char* argv[]) {
   }
 }
 
-// 阻塞至检测到手指，最长阻塞wait_time毫秒
+// Block until a finger is detected, the longest block wait_time is milliseconds
 bool Executive::waitUntilDetectFinger(int wait_time) {
   while (true) {
     if (car1.PS_DetectFinger()) {
@@ -204,7 +203,7 @@ bool Executive::waitUntilNotDetectFinger(int wait_time) {
 }
 
 
-// 主处理函数，解析命令
+// The main processing function, parsing the command
 void Executive::analyseArgv(int argc, char* argv[]) {
   if (match("door")) {
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -249,12 +248,12 @@ void Executive::analyseArgv(int argc, char* argv[]) {
       exit(1);
     }
 
-    // 判断用户是否抬起了手指，
+    // Determine if the user has raised their finger，
     printf("Ok.\nPlease raise your finger!\n");
     if (waitUntilNotDetectFinger(5000)) {
       delay(100);
       printf("Ok.\nPlease put your finger again!\n");
-      // 第二次录入指纹
+      // input fingerprint for sencond time
       if (waitUntilDetectFinger(5000)) {
         delay(500);
         car1.PS_GetImage() || PS_Exit();
@@ -282,7 +281,7 @@ void Executive::analyseArgv(int argc, char* argv[]) {
     if (g_error_code != 0x00)
       PS_Exit();
 
-    // 合并特征文件
+    // Merge feature files
     car1.PS_RegModel() || PS_Exit();
     car1.PS_StoreChar(2, bike1.toInt(argv[2])) || PS_Exit();
 
@@ -344,7 +343,7 @@ void Executive::analyseArgv(int argc, char* argv[]) {
     int startPageID = 0;
     int count = 0;
 
-    // 判断参数个数
+    // Determine the number of parameters
     if (g_argc == 3) {
       startPageID = bike1.toInt(argv[2]);
       count = 1;
@@ -361,7 +360,7 @@ void Executive::analyseArgv(int argc, char* argv[]) {
       exit(1);
     }
 
-    // 询问是否继续
+    // ask for continuing or not 
     fflush(stdout);
     char cmd = getchar();
     if (cmd == 'n' || cmd ==  'N') {
@@ -413,7 +412,7 @@ void Executive::analyseArgv(int argc, char* argv[]) {
     int pageID = 0;
     int score = 0;
     
-    // 检测手指是否存在
+    // check the finger exist or not 
     int count = 0;
     printf("Please put your finger on the moudle\n");
     while (digitalRead(g_as608.detect_pin) == LOW) {
@@ -428,7 +427,7 @@ void Executive::analyseArgv(int argc, char* argv[]) {
     printf("Matched! pageID=%d score=%d\n", pageID, score);
   }
 
-  // 列出指纹列表
+  // list fingerprints
   else if (match("list")) {
     checkArgc(2);
     int indexList[512] = { 0 };
@@ -485,7 +484,7 @@ void Executive::analyseArgv(int argc, char* argv[]) {
 
   else if (match("random")) {
     checkArgc(2);
-    uint randomNum = 0; // 必须是unsigned int，否则可能会溢出
+    uint randomNum = 0; // must be unsigned int，Otherwise it may overflow
     car1.PS_GetRandomCode(&randomNum) ||  PS_Exit();
     printf("%u\n", randomNum);
   }
@@ -613,7 +612,7 @@ void Executive::analyseArgv(int argc, char* argv[]) {
     uchar buf[513] = { 0 };
     car1.PS_ReadINFpage(buf, 512) ||  PS_Exit();
 
-    // 写入文件
+    // input files
     FILE* fp = fopen(argv[2], "w+");
     if (!fp) {
       printf("Open file error\n");
@@ -639,7 +638,7 @@ void Executive::analyseArgv(int argc, char* argv[]) {
       exit(1);
     }
 
-    if (strlen(buf) > 31) {   // 如果输入的字符多于31个
+    if (strlen(buf) > 31) {   // If more than 31 chars are entered
       printf("Too long, continute to save the first 31 characters? (Y/n): ");
       char c = 0;
       scanf("%c", &c);
@@ -668,7 +667,7 @@ void Executive::analyseArgv(int argc, char* argv[]) {
 } // end analyseArgv
 
 
-// 打印配置文件内容到屏幕上
+// print the contents of the configuration file to the screen
 void Executive::printConfig() {
   printf("address=%08x\n", g_config.address);
   if (g_config.has_password)
@@ -680,7 +679,7 @@ void Executive::printConfig() {
   printf("detect_pin=%d\n",   g_config.detect_pin);
 }
 
-// 同步g_config变量内容和其他变量内容
+// Synchronize g_config variable content with other variable content
 void Executive::asyncConfig() {
   g_as608.detect_pin   = g_config.detect_pin;
   g_as608.has_password = g_config.has_password;
@@ -689,22 +688,22 @@ void Executive::asyncConfig() {
   g_as608.baud_rate    = g_config.baudrate;
 }
 
-// 读取配置文件
+// read configuration files
 bool Executive::readConfig() {
   FILE* fp;
 
-  // 获取用户主目录
+  // obtain main catalogue of users
   char filename[256] = { 0 };
   sprintf(filename, "%s/.fpconfig", getenv("HOME"));
   
-  // 主目录下的配置文件
+  // configurate files under home directory
   if (access(filename, F_OK) == 0) { 
     bike1.trimSpaceInFile(filename);
     fp = fopen(filename, "r");
   }
   else {
-    // 如果配置文件不存在，就在主目录下创建配置文件，并写入默认配置
-    // 设置默认值
+    // if configuration files are not exist, establish configuration files under main and write default disposition
+    // set up default values
     g_config.address = 0xffffffff;
     g_config.password= 0x00000000;
     g_config.has_password = 0;
@@ -731,7 +730,7 @@ bool Executive::readConfig() {
   while (!feof(fp)) {
     fgets(line, 32, fp);
     
-    // 分割字符串，得到key和value
+    // Split the string to get the key and value
     if (tmp = strtok(line, "="))
       bike1.trim(tmp, key);
     else
@@ -743,7 +742,7 @@ bool Executive::readConfig() {
     while (!tmp)
       tmp = strtok(NULL, "=");
 
-    // 如果数值以 0x 开头
+    // If the value starts with 0x
     int offset = 0;
     if (value[0] == '0' && (value[1] == 'x' || value[1] == 'X'))
       offset = 2;
@@ -753,10 +752,10 @@ bool Executive::readConfig() {
     }
     else if (strcmp(key, "password") == 0) {
       if (strcmp(value, "none") == 0 || strcmp(value, "false") == 0) {
-        g_config.has_password = 0; // 无密码
+        g_config.has_password = 0; // no password
       }
       else {
-        g_config.has_password = 1; // 有密码
+        g_config.has_password = 1; // with password
         g_config.password = bike1.toUInt(value+offset);
       }
     }
@@ -786,10 +785,10 @@ bool Executive::readConfig() {
   return true;
 }
 
-//写配置文件
+//write configuration file
 
 bool Executive::writeConfig() {
-  // 获取用户主目录
+  // obtain mian catalogue of users
   char filename[256] = { 0 };
   sprintf(filename, "%s/.fpconfig", getenv("HOME"));
   
@@ -812,7 +811,7 @@ bool Executive::writeConfig() {
 }
 
 
-// 打印程序使用说明
+// print description of this procedure
 void Executive::printUsage() {
   printf("A command line program to interact with AS608 module.\n\n");
   printf("Usage:\n  ./fp [command] [param] [option]\n");
