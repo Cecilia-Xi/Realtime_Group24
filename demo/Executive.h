@@ -19,11 +19,17 @@ extern int g_verbose;
 extern char  g_error_desc[128];
 extern uchar g_error_code;
 
+#include <stdio.h>
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 class Executive{
 	public:
 
+		//bool PS_Setup_cb(uint chipAddr, uint password);
 		int  g_argc = 0;   // 参数个数，g_argc = argc - g_option_count
 		int  g_option_count = 0; // 选项个数-v、-h等
 		char g_command[16] = { 0 };     // 即argv[1]
@@ -49,9 +55,16 @@ class Executive{
 		bool match(const char* str);
 		
 		void lockerControl();
+		
 	private:
+	
+		// Callback function pointers
+		Car* a1 = nullptr;
+		
 		Car car1;
 		Bike bike1;
 	};
-
+#ifdef __cplusplus
+}
+#endif
 #endif // __EXECUTIVE_H__

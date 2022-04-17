@@ -10,6 +10,7 @@
 #include <stdarg.h>
 #include <wiringPi.h>
 #include <wiringSerial.h>
+using namespace std;
 
 /********************type construct******************/
 	
@@ -43,17 +44,36 @@ extern char  g_error_desc[128];
 extern uchar g_error_code;
 
 /********************Global Variables ENd******************/
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+typedef void (*sum_handler_ptr)(int cb_a, int cb_b, void* arg1);
+static sum_handler_ptr sum_handler_;
+static void* foo_object_instance;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+typedef void (*sum_handler_type)(int cb_a, int cb_b);
+static sum_handler_type sum_handler_;
+
+*/
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class Car
 {
 public:
 
-	
+	//typedef void (*FuncCallBack)(void* cbThis);
 
-	
+	  
+	//void GetCallBack(const int i, void (*FuncCallBack)(int,int));
+
+
+
 	/********************Public Functions******************/
 	Car(){};
 	~Car(){};
+	//bool PS_Setup(uint chipAddr, uint password);       // 0x00000000 ~ 0xffffffff
+
 	bool PS_Setup(uint chipAddr, uint password);       // 0x00000000 ~ 0xffffffff
 	
 	bool PS_GetImage();
@@ -93,9 +113,36 @@ public:
 
 	// carry the g_error_code val and return to g_error_desc
 	char* PS_GetErrorDesc();
+	
+	//void registerCallback(CallbackInterface* cb);
 	/********************Public Functions End******************/
+	
+	
+	void register_callbacks();
+	
+	//bool callback_PS_Setup(uint chipAddr, uint password); 
+	typedef bool (Car::*cb_setup) (uint, uint);
+	bool get_cb_setup(uint chipAddr, uint password, cb_setup* setuper);
+	
+	void callback_sum(int value,int value2);
 private:
+	
+	//static setup_handler_type setup_handler_;
+	//CallbackInterface* PS_Setupcallback = nullptr;
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	void  Sum(int a, int b);
 
+	static void cb_sum(int fuck_a, int fuck_b, void *arg1);
+	
+	void register_handler( void (*summer)(int, int, void *) , void* p_instance);
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//static void  Sum(int a, int b);
+	
+	//void register_handler( void (*summer)(int, int));
+	
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
 	//split unsigned int val into seperate int val
 	void Split(uint num, uchar* buf, int count);
 	

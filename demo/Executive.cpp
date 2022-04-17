@@ -1,7 +1,16 @@
 #include "Executive.h"
+#include <iostream>
+
 #define SWITCH 7
+
+  
 Executive::Executive()
 {
+  /**< Getter function pointer of type int void (*summer)(int,int). */
+  a1->register_callbacks();
+  a1->callback_sum(1,4);
+  //call_cpp_sum_function();
+  //register_handler( &Executive::call_cpp_sum_function );
 
 }
 	
@@ -58,8 +67,9 @@ void Executive::run(int argc, char *argv[])
 
 	// 7.初始化 AS608 模块
 	// 地址 密码
+  ///////////////////////car1->PS_Setup_cb(g_config.address, g_config.password) ||  PS_Exit();
 	car1.PS_Setup(g_config.address, g_config.password) ||  PS_Exit();
-
+  //car1.get_cb_setup(g_config.address, g_config.password,&Car::PS_Setup) || PS_Exit();
 	// 8.主处理函数，解析普通命令(argv[1])，
 	analyseArgv(argc, argv);
 

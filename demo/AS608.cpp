@@ -1,6 +1,6 @@
 
 #include "AS608.h"
-
+#include <iostream>
 AS_608 g_as608;
 int   g_fd;          // file char, return when serial opened
 int   g_verbose;     // the details level of output
@@ -9,13 +9,92 @@ uchar g_error_code;      // the module return code when function return false
 
 uchar g_order[64] = { 0 }; // the instruction package 
 uchar g_reply[64] = { 0 }; // the reply package
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Car::Sum(int a, int b)
+{
+  int c =a+b;
+  std::cout<<"here is sum\n";
+  std::cout<<c;
+}
+
+void Car::cb_sum(int fuck_a, int fuck_b, void *arg1)
+{
+  std::cout<<"here is cb_sum\n";
+  Car* Car_demo = static_cast<Car*>(arg1);
+  
+  Car_demo->Sum(fuck_a,fuck_b);
+}
+
+//! \param summer Setter function pointer of type void (*summer)(int,int).
+void Car::register_handler( void (*summer)(int, int, void *) , void* p_instance)
+{
+    std::cout<<"here is call back handler\n";
+    sum_handler_ = summer;
+    foo_object_instance = p_instance;
+}
+
+void Car::register_callbacks() {
+    std::cout<<"here is call back func\n";
+    register_handler(Car::cb_sum, static_cast<void *>(this));
+}	
+void Car::callback_sum(int value,int value2)
+{
+    sum_handler_(value, value2, foo_object_instance);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+void Car::Sum(int a, int b)
+{
+  int c =a+b;
+  std::cout<<"here is sum\n";
+  std::cout<<c;
+}
+
+//! \param summer Setter function pointer of type void (*summer)(int,int).
+void Car::register_handler( void (*summer)(int, int))
+{
+    std::cout<<"here is call back handler\n";
+    sum_handler_ = summer;
+}
+
+void Car::register_callbacks()
+{
+    std::cout<<"here is call back func\n";
+    register_handler(Sum);
+}	
+
+bool Car::callback_PS_Setup(uint chipAddr, uint password)
+{
+    std::cout<<"here is call back PS_Setup\n";
+    setup_handler_(chipAddr, password);
+}
+
+void Car::callback_sum(int value, int value2)
+{
+    std::cout<<"here is call back sum\n";
+    sum_handler_(value, value2);
+}
 
 
+bool Car::get_cb_setup(uint chipAddr, uint password, cb_setup* setuper)
+{
+  Car* car = static_cast<Car>(setuper);
+  
+  return car->setuper(chipAddr, password) ;
+  }
+*/
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /******************************************************************************
 * Helper Functions
 ******************************************************************************/
-
-
+///////////////////////
+/*
+void Car::registerCallback(CallbackInterface* cb) {
+	PS_Setupcallback = cb;
+}*/
+///////////////////////
 void Car::Split(uint num, uchar* buf, int count) {
   for (int i = 0; i < count; ++i) {
     *buf++ = (num & 0xff << 8*(count-i-1)) >> 8*(count-i-1);
@@ -374,9 +453,12 @@ int Car::GenOrder(uchar orderCode, const char* fmt, ...) {
 
 
 bool Car::PS_Setup(uint chipAddr, uint password) {
+
   g_as608.chip_addr = chipAddr;
   g_as608.password  = password;
-
+  ////////////////////////////////////////////////////////
+  //PS_Setupcallback->PS_Setup_cb(chipAddr, password);
+  ////////////////////////////////////////////////////////
   if (g_verbose == 1)
     printf("-------------------------Initializing-------------------------\n");
   //验证密码
