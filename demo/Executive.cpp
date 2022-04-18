@@ -16,6 +16,8 @@ Executive::Executive()
 	
 Executive::~Executive()
 {
+  a1 = nullptr;
+  delete a1;
 	
 }
 void Executive::lockerControl()
@@ -56,7 +58,7 @@ void Executive::run(int argc, char *argv[])
 
 	// 5.打开串口
 	if((g_fd = serialOpen(g_config.serial, g_config.baudrate)) < 0)	{
-    //std::cout<<"serial "<<g_config.serial<<" baudrate "<<g_config.baudrate<<"\n";
+    std::cout<<"serial "<<g_config.serial<<" baudrate "<<g_config.baudrate<<"\n";
 		fprintf(stderr,"Unable to open serial device: %s\n", strerror(errno));
     exit(0);
 	}
@@ -217,34 +219,50 @@ bool Executive::waitUntilNotDetectFinger(int wait_time) {
 // 主处理函数，解析命令
 void Executive::analyseArgv(int argc, char* argv[]) {
   if (match("door")) {
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    checkArgc(2);
+
+    printf("Please put your finger on the module.\n");
+    delay(1000);
+    car1.PS_GetImage() || PS_Exit();
+    car1.PS_GenChar(1) || PS_Exit();
+
+    int pageID = 0, score = 0;
+    if (!car1.PS_Search(1, 0, 300, &pageID, &score))
+      PS_Exit();
+    else
+    {   
+        //lockerControl();
+        pinMode (SWITCH,OUTPUT);
+        printf("FBI open the door!\n");
+        digitalWrite (SWITCH,LOW);//set it initially as high, is closed
+        
+        delay(3000);
+        digitalWrite (SWITCH,HIGH);
+
+        pinMode(g_config.detect_pin, INPUT);
+    }
+
+    //printf("Matched! pageID=%d score=%d\n", pageID, score);
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  }
+  else if (match("doortest")) {
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   checkArgc(2);
+ 
+  //lockerControl();
+  pinMode (SWITCH,OUTPUT);
+  printf("FBI open the door!\n");
+  digitalWrite (SWITCH,LOW);//set it initially as high, is closed
+  
+  delay(3000);
+  digitalWrite (SWITCH,HIGH);
 
-  printf("Please put your finger on the module.\n");
-  delay(2000);
-  car1.PS_GetImage() || PS_Exit();
-  car1.PS_GenChar(1) || PS_Exit();
-
-  int pageID = 0, score = 0;
-  if (!car1.PS_Search(1, 0, 300, &pageID, &score))
-    PS_Exit();
-  else
-  {   
-      //lockerControl();
-      pinMode (SWITCH,OUTPUT);
-      printf("FBI open the door!\n");
-      digitalWrite (SWITCH,LOW);//set it initially as high, is closed
-      
-      delay(6000);
-      digitalWrite (SWITCH,HIGH);
-
-      pinMode(g_config.detect_pin, INPUT);
-  }
+  pinMode(g_config.detect_pin, INPUT);
 
   //printf("Matched! pageID=%d score=%d\n", pageID, score);
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   }
-  
   
   else if (match("add")) {
     checkArgc(3);
