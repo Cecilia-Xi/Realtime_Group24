@@ -24,10 +24,10 @@ extern uchar g_error_code;
 class Executive{
 	public:
 
-		int  g_argc = 0;   // 参数个数，g_argc = argc - g_option_count
-		int  g_option_count = 0; // 选项个数-v、-h等
-		char g_command[16] = { 0 };     // 即argv[1]
-		Config g_config;   // 配置文件 结构体，定义在"./utils.h"头文件中
+		int  g_argc = 0;   // numbers of parameters，g_argc = argc - g_option_count
+		int  g_option_count = 0; // numbers of options-v、-h etc.
+		char g_command[16] = { 0 };     // that is argv[1]
+		Config g_config;   // Configuration file structure, defined in the "./utils.h" header file
 		
 		Executive();
 		~Executive();
@@ -35,13 +35,13 @@ class Executive{
 
 		void printConfig();
 		void printUsage();
-		bool readConfig();  // 读取文件到 g_config
-		bool writeConfig(); // 将 g_config 写入文件
+		bool readConfig();  // read file to g_config
+		bool writeConfig(); // wirte g_config into file
 		void asyncConfig();
 		void priorAnalyseArgv(int argc, char* argv[]);
 		void analyseArgv(int argc, char* argv[]);
 
-		bool waitUntilDetectFinger(int wait_time);   // 阻塞至检测到手指，最长阻塞wait_time毫秒
+		bool waitUntilDetectFinger(int wait_time);   // Block until a finger is detected, the longest block wait_time milliseconds
 		bool waitUntilNotDetectFinger(int wait_time);
 		bool PS_Exit();
 		static void atExitFunc();
