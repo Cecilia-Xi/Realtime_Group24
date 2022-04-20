@@ -1,5 +1,5 @@
 fp: main.o Executive.o
-	g++ -std=c++11 -g -Wall main.o Executive.o -o fp -lwiringPi
+	g++ -std=c++11 -g -Wall main.o Executive.o -o fp -lwiringPi -pthread
 
 main.o: main.cpp Executive.h
 	g++ -std=c++11 -g -Wall -c main.cpp

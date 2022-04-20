@@ -1,10 +1,10 @@
 #include "Executive.h"
-#include <iostream>
-
-
+#define SYSFS_GPIO_DIR "/sys/class/gpio"
+#define MAX_BUF 512
 #define SWITCH 7
 
 
+AS_608 g_as608;
 int   g_fd;          // file char, return when serial opened
 int   g_verbose;     // the details level of output
 char  g_error_desc[128]; // error info
@@ -12,84 +12,297 @@ uchar g_error_code;      // the module return code when function return false
 
 uchar g_order[64] = { 0 }; // the instruction package 
 uchar g_reply[64] = { 0 }; // the reply package
-//split unsigned int val into seperate int val
 
-void Executive::trimSpaceInFile(const char* filename) {
-  FILE* fp = fopen(filename, "r");
-  if (!fp)
-    return;
-  //buffer for input except white space and '\n'
-  char lineBuf[64] = { 0 };
-  char writeBuf[1024] = { 0 };
-  
-  int offset = 0;
-  
-  while (!feof(fp)) {
-    fgets(lineBuf, 64, fp);
-    if (feof(fp))
-      break;
-      
-    for (int i = 0, len = strlen(lineBuf); i < len; ++i) {
-      if (lineBuf[i] != ' ' && lineBuf[i] != '\t') {
-        if (lineBuf[i] == '\n' && offset > 0 && writeBuf[offset-1] == '\n')
-          continue;
-        writeBuf[offset++] = lineBuf[i];
+
+/*************************************************************************************************/
+/****************************     Call Back definition        **********************************/
+/*************************************************************************************************/
+
+void Executive::cb_search()
+{   
+    //old_run();
+    printf("Please put your finger on the module.\n");
+    if (Get_getimage_CallBack (this,getimage_CALLBACK))
+    {
+      if(Get_genchar_CallBack(this,genchar_CALLBACK,1))
+      {
+	int pageID = 0;
+	int score = 0;
+	if (! Get_search_CallBack(this,search_CALLBACK, 1, 0, 300, &pageID, &score))
+	  Get_exit_CallBack(this,exit_CALLBACK);
+	else
+	{
+	  //lockerControl();
+	  pinMode (SWITCH,OUTPUT);
+	  printf("FBI open the door!\n");
+	  digitalWrite (SWITCH,LOW);//set it initially as high, is closed
+
+	  delay(1000);
+	  digitalWrite (SWITCH,HIGH);
+	  printf("Your are No.%d pleace come in\n", pageID);
+	}
       }
+      else
+	Get_exit_CallBack(this,exit_CALLBACK);
     }
-    
+    else
+      Get_exit_CallBack(this,exit_CALLBACK);
+    }
+bool Executive::cb_GetImage()
+{
+    int size = GenOrder(0x01, "");
+
+    // send the command pack 
+    SendOrder(g_order, size);
+
+    // receive the response pack, check the comfirmation pack and verify sum 
+    return (RecvReply(g_reply, 12) && Check(g_reply, 12));
+
+}
+
+
+bool Executive::cb_GenChar(uchar bufferID)
+{
+    int size = GenOrder(0x02, "%d", bufferID);
+    SendOrder(g_order, size);
+
+    // receive the response pack, check the comfirmation pack and verify sum 
+    return (RecvReply(g_reply, 12) && Check(g_reply, 12));
+}
+
+bool Executive::cb_Exit()
+{
+    printf("ERROR! code=%02X, desc=%s\n", g_error_code,  PS_GetErrorDesc());
+    return true;
+}
+
+bool Executive::search_CALLBACK(void* lpvoid, uchar bufferID, int startPageID, int count, int* pPageID, int* pScore)
+{
+    Executive* exe_ptr = (Executive*)(lpvoid);
+    return exe_ptr->PS_Search(bufferID, startPageID, count, pPageID, pScore);
+}	
+
+bool Executive::getimage_CALLBACK(void* lpvoid)
+{
+    Executive* exe_ptr = (Executive*)(lpvoid);
+    return exe_ptr->cb_GetImage();
+}	
+
+bool Executive::genchar_CALLBACK(void* lpvoid, uchar bufferID)
+{
+    Executive* exe_ptr = (Executive*)(lpvoid);
+    return exe_ptr->cb_GenChar(bufferID);
+}	
+
+bool Executive::exit_CALLBACK(void* lpvoid)
+{
+    Executive* exe_ptr = (Executive*)(lpvoid);
+    return exe_ptr->cb_Exit();
+}	
+
+
+bool Get_search_CallBack(void* lpvoid, cb_search_ptr callback_param, uchar bufferID, int startPageID, int count, int* pPageID, int* pScore)
+{
+    return callback_param(lpvoid, bufferID, startPageID, count, pPageID, pScore);
+}
+
+bool Get_getimage_CallBack(void* lpvoid, cb_getimage_ptr callback_param)
+{
+    return callback_param(lpvoid);
+}
+
+bool Get_genchar_CallBack(void* lpvoid, cb_genchar_ptr callback_param, uchar a)
+{
+    return callback_param(lpvoid, a);
+}
+
+bool Get_exit_CallBack(void* lpvoid, cb_exit_ptr callback_param)
+{
+    return callback_param(lpvoid);
+} 
+
+
+
+void Executive::registerCallback(FingerPrint_CallBack* cb)
+{
+    fp_callback_ptr = cb;
+}
+  
+void Executive::unRegisterCallback()
+{
+    fp_callback_ptr = nullptr;
+}
+
+
+void Executive::start()
+{
+  if (nullptr != thread_1) {
+	  // already running
+	  return;
   }
 
-  fclose(fp);
-  //overwrtie file
-  fp = fopen(filename, "w+");
-  if (!fp)
-    return;
-  fwrite(writeBuf, 1, strlen(writeBuf), fp);
-  fclose(fp);
+#ifdef DEBUG
+	fprintf(stderr,"Sending reset.\n");
+#endif
+  if (!readConfig())
+    exit(1);
+
+  if (g_verbose == 1)
+    printConfig();
+
+  if (-1 == wiringPiSetup()) {
+    printf("wiringPi setup failed!\n");
+    exit(0);
+    }
+    
+  pinMode(g_config.detect_pin, INPUT);
+
+  if((g_fd = serialOpen(g_config.serial, g_config.baudrate)) < 0)	
+  {
+    fprintf(stderr,"Unable to open serial device: %s\n", strerror(errno));
+    exit(0);
+  }
+  
+  atexit(atExitFunc);
+
+  PS_Setup(g_config.address, g_config.password) ||  PS_Exit();
+   
+  // 7.dispose main funtion and analysis general commands (argv[1])，
+  //analyseArgv(argc, argv);
+
+  thread_1 = new thread(exec,this);
+}
+
+void Executive::stop()
+{
+  running = 0;
+  if (nullptr != thread_1)
+  {
+    thread_1->join();
+    delete thread_1;
+    thread_1 = nullptr;
+    
+#ifdef DEBUG
+    fprintf(stderr,"DAQ thread stopped.\n");
+#endif	
+  }
+}
+//argv77777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
+
+
+void Executive::run()
+{
+  
+  // get a file descriptor for the IRQ GPIO pin
+  int fp_fd = serialOpen(g_config.serial, g_config.baudrate); 
+  //int sys_fs_fd = 0;
+  running = 1;
+  while (running)
+  {
+    // let's wait for data for max one second
+    // goes to sleep until an interrupt happens
+    int ret = fd_Poll(fp_fd,2000);
+    printf("TEST fd_Poll return value %d \n",ret);
+    if (ret < 1)
+    {
+#ifdef DEBUG
+      fprintf(stderr,"Poll error %d\n",ret);
+#endif
+      throw "Interrupt timeout";
+    }
+    cb_search(); 
+
+  }
+
+}
+
+int Executive::fd_Poll(int gpio_fd, int timeout)
+{
+  struct pollfd fdset[1];
+  int nfds = 1;
+  int rc;
+  char buf[MAX_BUF];
+  memset((void*)fdset, 0, sizeof(fdset));
+
+  fdset[0].fd = gpio_fd;
+  fdset[0].events = POLLPRI;//
+
+  rc = poll(fdset, nfds, timeout);
+
+  if (fdset[0].revents & POLLPRI) {//
+    // dummy read
+    //RecvPacket(uchar* pData, int validDataSize);
+
+    int r = read(fdset[0].fd, buf, MAX_BUF);
+    if (r < 0) {
+#ifdef DEBUG
+	perror("gpio/export");
+#endif
+      return r;
+    }
+    
+    printf("TEST in revents");
+  }
+  printf("TEST end of fd poll");
+  return rc;
 }
 
 
-void Executive::trim(const char* strIn, char* strOut) {
-  int i = 0;
-  int j = strlen(strIn) - 1;
-  //detect space
-  while (strIn[i] == ' ')
-    ++i;
-  //detect '\n'
-  while (strIn[j] == ' ' || strIn[j] == '\n')
-    --j;
-  strncpy(strOut, strIn+i, j-i+1);
-  strOut[j-i+1] = 0;
+/*************************************************************************************************/
+/****************************          Call Back END            **********************************/
+/*************************************************************************************************/
+
+
+//int argc, char *argv[]
+void Executive::old_run()
+{
+  // 1.read configuration files, obtain the chip address and the signal password 
+  if (!readConfig())
+    exit(1);
+
+  // 2.priorify analysis content such as parameters options and allocate local files 
+  //priorAnalyseArgv(argc, argv);
+
+  if (g_verbose == 1)
+    printConfig();
+
+  // 3.initialize wiringPi library
+  if (-1 == wiringPiSetup()) {
+    printf("wiringPi setup failed!\n");
+    exit(0);
+  }
+
+  // 4.Detect if there is a GPIO port on which a finger is placed, and set it to input mode
+  pinMode(g_config.detect_pin, INPUT);
+
+  //test the configeration
+  //printConfig();
+
+  // 5.Open serial port
+  if((g_fd = serialOpen(g_config.serial, g_config.baudrate)) < 0)	{
+    std::cout<<"serial "<<g_config.serial<<" baudrate "<<g_config.baudrate<<"\n";
+    fprintf(stderr,"Unable to open serial device: %s\n", strerror(errno));
+    exit(0);
+  }
+
+
+  // 6.Register the exit function (print some information, close the serial port, etc.)
+  atexit(atExitFunc);
+
+
+  // 7.initialize AS608 module 
+  PS_Setup(g_config.address, g_config.password) ||  PS_Exit();
+
+  // 8.dispose main funtion and analysis general commands (argv[1])，
+  //analyseArgv(argc, argv);
+
 }
-
-
-int Executive::toInt(const char* str) {
-  int ret = 0;
-  sscanf(str, "%d", &ret);
-  return ret;
-}
-
-unsigned int Executive::toUInt(const char* str) {
-  unsigned int ret = 0;
-  if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X'))
-    sscanf(str+2, "%x", &ret);
-  else
-    sscanf(str, "%x", &ret);
-
-  return ret;
-}
-
-
 Executive::Executive()
 {
   /**< Getter function pointer of type int void (*summer)(int,int). */
-  //a1->register_callbacks();
-  //a1->callback_sum(1,4);
-  //call_cpp_sum_function();
-  //register_handler( &Executive::call_cpp_sum_function );
+
 
 }
-	
 Executive::~Executive()
 {
   //a1 = nullptr;
@@ -108,69 +321,10 @@ void Executive::lockerControl()
   pinMode(g_config.detect_pin, INPUT);
 }
 
-void Executive::run(int argc, char *argv[])
-{
-	// 1.read configuration files, obtain the chip address and the signal password 
-	if (!readConfig())
-		exit(1);
-
-	// 2.priorify analysis content such as parameters options and allocate local files 
-	priorAnalyseArgv(argc, argv);
-
-	if (g_verbose == 1)
-		printConfig();
-
-	// 3.initialize wiringPi library
-	if (-1 == wiringPiSetup()) {
-		printf("wiringPi setup failed!\n");
-    exit(0);
-	}
-
-	// 4.Detect if there is a GPIO port on which a finger is placed, and set it to input mode
-	pinMode(g_config.detect_pin, INPUT);
-
-  //test the configeration
-  //printConfig();
-
-	// 5.Open serial port
-	if((g_fd = serialOpen(g_config.serial, g_config.baudrate)) < 0)	{
-    std::cout<<"serial "<<g_config.serial<<" baudrate "<<g_config.baudrate<<"\n";
-		fprintf(stderr,"Unable to open serial device: %s\n", strerror(errno));
-    exit(0);
-	}
-
-  
-	// 6.Register the exit function (print some information, close the serial port, etc.)
-	atexit(atExitFunc);
-
-
-	// 7.initialize AS608 module 
-	 PS_Setup(g_config.address, g_config.password) ||  PS_Exit();
-
-	// 8.dispose main funtion and analysis general commands (argv[1])，
-	analyseArgv(argc, argv);
-  /*
-   *
-  AD7705settings s;
-  s.channel = AD7705settings::AIN1;
-  s.samplingRate = AD7705settings::FS50HZ;
-  
-  Executive m_car();
-  FINGERPRINT_SampleCallback fp_SAMPLE_cb;
-  m_car.registerCallback(&fp_SAMPLE_cb);
-  m_car.start();
-  getchar();
-  m_car.stop();
-  return 0;
-  * 
-  * */
-}
-	
 //The program exited because the function in as608.h failed to execute
 bool Executive::PS_Exit()
 {
   printf("ERROR! code=%02X, desc=%s\n", g_error_code,  PS_GetErrorDesc());
-  exit(2);
   return true;
 }
 
@@ -991,268 +1145,6 @@ void Executive::printUsage() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*************************************************************************************************/
-/****************************     Call Back declairation        **********************************/
-/*************************************************************************************************/
-/*
-int Executive::fd_Poll(int gpio_fd, int timeout)
-{
-  struct pollfd fdset[1];
-  int nfds = 1;
-  int rc;
-  char buf[MAX_BUF];
-
-  memset((void*)fdset, 0, sizeof(fdset));
-
-  fdset[0].fd = gpio_fd;
-  fdset[0].events = POLLPRI;//
-
-  rc = poll(fdset, nfds, timeout);
-
-  if (fdset[0].revents & POLLPRI) {//
-    // dummy read
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    printf("Please put your finger on the module.\n");
-    if (waitUntilDetectFinger(500)) {
-      delay(500);
-       PS_GetImage() || PS_Exit();
-       PS_GenChar(1) || PS_Exit();
-    }
-    else {
-      printf("Error: Didn't detect finger!\n");
-      exit(1);
-    }
-
-    // Determine if the user has raised their finger，
-    printf("Ok.\nPlease raise your finger!\n");
-    if (waitUntilNotDetectFinger(500)) {
-      delay(100);
-      printf("Ok.\nPlease put your finger again!\n");
-      // input fingerprint for sencond time
-      if (waitUntilDetectFinger(500)) {
-        delay(500);
-         PS_GetImage() || PS_Exit();
-         PS_GenChar(2) || PS_Exit();
-      }
-      else {
-        printf("Error: Didn't detect finger!\n");
-        exit(1);
-      }
-    }
-    else {
-      printf("Error! Didn't raise your finger\n");
-      exit(1);
-    }
-
-    int score = 0;
-    if ( PS_Match(&score)) {
-      printf("Matched! score=%d\n", score);
-    }
-    else {
-      printf("Not matched, raise your finger and put it on again.\n");
-      exit(1);
-    }
-    
-    if (g_error_code != 0x00)
-      PS_Exit();
-
-    // Merge feature files
-     PS_RegModel() || PS_Exit();
-     PS_StoreChar(2,  toInt(argv[2])) || PS_Exit();
-
-    printf("OK! New fingerprint saved to pageID=%d\n",  toInt(argv[2]));
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //add func
-    //
-    int r = read(fdset[0].fd, buf, MAX_BUF);
-    if (r < 0) {
-#ifdef DEBUG
-    perror("gpio/export");
-#endif
-    return r;
-    }
-  }
-
-  return rc;
-}
-	
-void Executive::registerCallback(FingerPrint_CallBack* cb)
-{
-  fp_callback_ptr = cb;
-}
-  
-void Executive::unRegisterCallback()
-{
-  fp_callback_ptr = nullptr;
-}
-
-
-
-void Executive::run()
-{
-  // get a file descriptor for the IRQ GPIO pin
-  // int sys_fs_fd = getSysfsIRQfd(drdy_GPIO); sys_fs_fd == g_fd
-  int sys_fs_fd = g_fd;
-  running = 1;
-  while (running)
-  {
-    // let's wait for data for max one second
-    // goes to sleep until an interrupt happens
-    int ret = fd_Poll(sys_fs_fd,1000);
-    if (ret < 1)
-    {
-#ifdef DEBUG
-      fprintf(stderr,"Poll error %d\n",ret);
-#endif
-      throw "Interrupt timeout";
-    }
-    PS_Search(uchar bufferID, int startPageID, int count, int* pPageID, int* pScore) 
-    // tell the AD7705 to read the data register (16 bits)
-    writeReg(fd, commReg() | 0x38);
-    
-    // read the data register by performing two 8 bit reads
-    const float norm = 0x8000;
-    const float value = (readData(fd))/norm * 
-      ADC_REF / pgaGain();
-    
-    if (nullptr != fp_callback_ptr)
-    {
-      fp_callback_ptr->demo_func(value);
-      //search
-      //fp_callback_ptr->demo_search(value); 
-      //
-    }
-  }
-  close(sys_fs_fd);
-  gpio_unexport(drdy_GPIO);
-
-}
-
-void Executive::start()
-{
-  if (fp_callback_ptr != nullptr)
-  {
-    // already running
-    return;
-  }
-
-#ifdef DEBUG
-  fprintf(stderr,"Sending reset.\n");
-#endif
-
-
-  writeReset(fd);
-
-  // tell the AD7705 that the next write will be to the clock register
-  writeReg(fd,commReg() | 0x20);
-  
-  // write 00000100 : CLOCKDIV=0,CLK=1,expects 4.9152MHz input clock, sampling rate
-  writeReg(fd,0x04 | ad7705settings.samplingRate);
-
-  // tell the AD7705 that the next write will be the setup register
-  writeReg(fd,commReg() | 0x10);
-  
-  // intiates a self calibration and then converting starts
-  writeReg(fd,0x40 | (ad7705settings.mode << 2) | ( ad7705settings.pgaGain << 3) );
-
-
-#ifdef DEBUG
-  fprintf(stderr,"Starting DAQ thread.\n");
-#endif
-
-  car_Thread = new std::thread(exec,this);
-}
-
-void Executive::stop()
-{
-  running = 0;
-  if (nullptr != car_Thread)
-  {
-    car_Thread->join();
-    delete car_Thread;
-    car_Thread = nullptr;
-    
-#ifdef DEBUG
-    fprintf(stderr,"DAQ thread stopped.\n");
-#endif	
-  }
-}
-*/
-/*************************************************************************************************/
-/****************************          Call Back END            **********************************/
-/*************************************************************************************************/
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-void Executive::Sum(int a, int b)
-{
-  int c =a+b;
-  std::cout<<"here is sum\n";
-  std::cout<<c;
-}
-
-void Executive::cb_sum(int fuck_a, int fuck_b, void *arg1)
-{
-  std::cout<<"here is cb_sum\n";
-  Executive* Car_demo = static_cast<Executive*>(arg1);
-  
-  Car_demo->Sum(fuck_a,fuck_b);
-}
-
-//! \param summer Setter function pointer of type void (*summer)(int,int).
-void Executive::register_handler( void (*summer)(int, int, void *) , void* p_instance)
-{
-    std::cout<<"here is call back handler\n";
-    sum_handler_ = summer;
-    foo_object_instance = p_instance;
-}
-
-void Executive::register_callbacks() {
-    std::cout<<"here is call back func\n";
-    register_handler(Executive::cb_sum, static_cast<void *>(this));
-}	
-void Executive::callback_sum(int value,int value2)
-{
-    sum_handler_(value, value2, foo_object_instance);
-}
-*/
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 /******************************************************************************
 * Helper Functions
 ******************************************************************************/
@@ -1262,6 +1154,7 @@ void Executive::registerCallback(CallbackInterface* cb) {
 	PS_Setupcallback = cb;
 }*/
 ///////////////////////
+//split unsigned int val into seperate int val
 void Executive::Split(uint num, uchar* buf, int count) {
   for (int i = 0; i < count; ++i) {
     *buf++ = (num & 0xff << 8*(count-i-1)) >> 8*(count-i-1);
@@ -1679,6 +1572,7 @@ bool Executive::PS_Match(int* pScore) {
 }
 
 bool Executive::PS_Search(uchar bufferID, int startPageID, int count, int* pPageID, int* pScore) {
+
   int size = GenOrder(0x04, "%d%2d%2d", bufferID, startPageID, count);
   SendOrder(g_order, size);
 
@@ -2246,4 +2140,69 @@ char* Executive::PS_GetErrorDesc()
 	  return g_error_desc;
 }
 
+
+void Executive::trimSpaceInFile(const char* filename) {
+  FILE* fp = fopen(filename, "r");
+  if (!fp)
+    return;
+  //buffer for input except white space and '\n'
+  char lineBuf[64] = { 0 };
+  char writeBuf[1024] = { 0 };
+  
+  int offset = 0;
+  
+  while (!feof(fp)) {
+    fgets(lineBuf, 64, fp);
+    if (feof(fp))
+      break;
+      
+    for (int i = 0, len = strlen(lineBuf); i < len; ++i) {
+      if (lineBuf[i] != ' ' && lineBuf[i] != '\t') {
+        if (lineBuf[i] == '\n' && offset > 0 && writeBuf[offset-1] == '\n')
+          continue;
+        writeBuf[offset++] = lineBuf[i];
+      }
+    }
+    
+  }
+
+  fclose(fp);
+  //overwrtie file
+  fp = fopen(filename, "w+");
+  if (!fp)
+    return;
+  fwrite(writeBuf, 1, strlen(writeBuf), fp);
+  fclose(fp);
+}
+
+
+void Executive::trim(const char* strIn, char* strOut) {
+  int i = 0;
+  int j = strlen(strIn) - 1;
+  //detect space
+  while (strIn[i] == ' ')
+    ++i;
+  //detect '\n'
+  while (strIn[j] == ' ' || strIn[j] == '\n')
+    --j;
+  strncpy(strOut, strIn+i, j-i+1);
+  strOut[j-i+1] = 0;
+}
+
+
+int Executive::toInt(const char* str) {
+  int ret = 0;
+  sscanf(str, "%d", &ret);
+  return ret;
+}
+
+unsigned int Executive::toUInt(const char* str) {
+  unsigned int ret = 0;
+  if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X'))
+    sscanf(str+2, "%x", &ret);
+  else
+    sscanf(str, "%x", &ret);
+
+  return ret;
+}
 
