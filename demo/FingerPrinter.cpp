@@ -3,7 +3,7 @@
 int auto_page_id = 0;
 
 AS_608 g_as608;
-Config g_config;   // 配置文件 结构体，定义在"./utils.h"头文件中
+Config g_config;   
 int   g_fd;          // file char, return when serial opened
 int   g_verbose;     // the details level of output
 char  g_error_desc[128]; // error info
@@ -37,7 +37,10 @@ bool Get_exit_CallBack(void* lpvoid, cb_exit_ptr callback_param)
 }
 
 
-
+void interrupt()
+{
+	printf("sdasdasd\n");
+	}
 
 ///////////////////////
 /*
@@ -52,13 +55,13 @@ void FingerPrinter::cb_add ()
   
   if (waitUntilDetectFinger(5000))
   {
-    delay(500);
+    delay(2000);
     if(Get_getimage_CallBack(this,getimage_CALLBACK)){
       Get_genchar_CallBack(this,genchar_CALLBACK,1)||Get_exit_CallBack(this,exit_CALLBACK);
       // Determine if the user has raised their finger，
       printf("Ok.\nPlease raise your finger !\n");
       if (waitUntilNotDetectFinger(5000)){
-		delay(1000);
+		delay(100);
 		printf("Ok.\nPlease put your finger again!\n");
 		// input fingerprint for sencond time
 		if (waitUntilDetectFinger(5000)){
@@ -187,31 +190,30 @@ void FingerPrinter::Test1()
 			else{
 				//lockerControl();
 				pinMode (SWITCH,OUTPUT);
-				printf("FBI open the door!\n");
+				printf("Your are No.%d pleace come in\n", pageID);
 				digitalWrite (SWITCH,LOW);//set it initially as high, is closed
 
-				delay(1000);
+				delay(3000);
 				digitalWrite (SWITCH,HIGH);
-				printf("Your are No.%d pleace come in\n", pageID);
+				
 			}
 		}
 		else
 			Get_exit_CallBack(this,exit_CALLBACK);
-
-	//mu.unlock();	
+	fp_callback_ptr->cb_func1();
+		
   }	
+  //mu.unlock();
 }
 
 void FingerPrinter::Test2()
 {
 	printf("______________________IN___ADDING___________________\n");
-    if(!digitalRead(key_pin))
-    {
-      cb_add();
-      delay(50);
-      printf("666\n");
-    }
- 
+
+	cb_add();
+	delay(50);
+	
+	fp_callback_ptr->cb_func2();
 }
 
 void FingerPrinter::registerCallback(FingerPrint_CallBack* cb)
@@ -254,20 +256,16 @@ void FingerPrinter::start()
   atexit(atExitFunc);
 
   PS_Setup(g_config.address, g_config.password) ||  PS_Exit();
-   
-  // 7.dispose main funtion and analysis general commands (argv[1])，
+ 
 
   pinMode(key_pin,INPUT);
   pullUpDnControl(key_pin,PUD_UP);
   
-  //wiringPiISR(key, INT_EDGE_FALLING, &);
-  //int a1 = wiringPiISR(SWITCH, INT_EDGE_RISING, thread_1);
-  //int b2 = wiringPiISR(key_pin, INT_EDGE_FALLING, thread_2);
-  //a1 = b2;
+  printf("asd%d\n",key_pin);
   
-  thread_1 = new thread(exec1,this);
-  //thread_2 = new thread(exec2,this);
-
+  
+  thread_2 = new thread(exec2,this);
+	
 }
 
 void FingerPrinter::stop()
@@ -277,10 +275,12 @@ void FingerPrinter::stop()
   {
     thread_1->join();
     thread_2->join();
-    delete thread_1;
-    delete thread_2;
-    thread_1 = nullptr;
-    thread_2 = nullptr;
+    
+	delete thread_1;
+	delete thread_2;
+	thread_1 = nullptr;
+	thread_2 = nullptr;
+
     
 #ifdef DEBUG
     fprintf(stderr,"DAQ thread stopped.\n");
@@ -291,6 +291,21 @@ void FingerPrinter::stop()
 /******************************************************************************
 * FingerOrinter main Functions
 ******************************************************************************/
+FingerPrinter::FingerPrinter()
+{
+	
+}
+	
+FingerPrinter::~FingerPrinter()
+{
+	unRegisterCallback();
+	thread_1 = nullptr;
+	thread_2 = nullptr;
+	delete fp_callback_ptr;
+	delete thread_1;
+	delete thread_2;
+
+}
 
 void FingerPrinter::lockerControl()
 {
@@ -866,7 +881,6 @@ bool FingerPrinter::PS_VfyPwd(uint pwd) {
   int size = GenOrder(0x13, "%4d", pwd); 
   SendOrder(g_order, size);
 
-  // 接收数据，核对确认码和检校和
   return (RecvReply(g_reply, 12) && Check(g_reply, 12));
 }
 
@@ -891,18 +905,17 @@ bool FingerPrinter::PS_ReadSysPara() {
 bool FingerPrinter::readConfig() {
   FILE* fp;
 
-  // 获取用户主目录
+  
   char filename[256] = { 0 };
   sprintf(filename, "%s/.fpconfig", getenv("HOME"));
   
-  // 主目录下的配置文件
+  
   if (access(filename, F_OK) == 0) { 
     trimSpaceInFile(filename);
     fp = fopen(filename, "r");
   }
   else {
-    // 如果配置文件不存在，就在主目录下创建配置文件，并写入默认配置
-    // 设置默认值
+    
     g_config.address = 0xffffffff;
     g_config.password= 0x00000000;
     g_config.has_password = 0;
@@ -929,7 +942,7 @@ bool FingerPrinter::readConfig() {
   while (!feof(fp)) {
     fgets(line, 32, fp);
     
-    // 分割字符串，得到key和value
+    
     if (tmp = strtok(line, "="))
       trim(tmp, key);
     else
@@ -941,7 +954,6 @@ bool FingerPrinter::readConfig() {
     while (!tmp)
       tmp = strtok(NULL, "=");
 
-    // 如果数值以 0x 开头
     int offset = 0;
     if (value[0] == '0' && (value[1] == 'x' || value[1] == 'X'))
       offset = 2;
@@ -951,10 +963,10 @@ bool FingerPrinter::readConfig() {
     }
     else if (strcmp(key, "password") == 0) {
       if (strcmp(value, "none") == 0 || strcmp(value, "false") == 0) {
-        g_config.has_password = 0; // 无密码
+        g_config.has_password = 0; 
       }
       else {
-        g_config.has_password = 1; // 有密码
+        g_config.has_password = 1; 
         g_config.password = toUInt(value+offset);
       }
     }
@@ -984,7 +996,7 @@ bool FingerPrinter::readConfig() {
   return true;
 }
 
-// 打印配置文件内容到屏幕上
+
 void FingerPrinter::printConfig() {
   printf("address=%08x\n", g_config.address);
   if (g_config.has_password)
@@ -996,7 +1008,6 @@ void FingerPrinter::printConfig() {
   printf("detect_pin=%d\n",   g_config.detect_pin);
 }
 
-// 同步g_config变量内容和其他变量内容
 void FingerPrinter::asyncConfig() {
   g_as608.detect_pin   = g_config.detect_pin;
   g_as608.has_password = g_config.has_password;
@@ -1005,7 +1016,6 @@ void FingerPrinter::asyncConfig() {
   g_as608.baud_rate    = g_config.baudrate;
 }
 
-// 程序退出时执行的工作，关闭串口等
 void FingerPrinter::atExitFunc() {
   if (g_verbose == 1)
     printf("Exit\n");
@@ -1013,11 +1023,9 @@ void FingerPrinter::atExitFunc() {
     serialClose(g_fd); 
 }
 
-/*
- * 写配置文件
-*/
+
 bool FingerPrinter::writeConfig() {
-  // 获取用户主目录
+  
   char filename[256] = { 0 };
   sprintf(filename, "%s/.fpconfig", getenv("HOME"));
   

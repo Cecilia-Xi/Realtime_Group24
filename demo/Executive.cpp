@@ -1,14 +1,6 @@
 #include "Executive.h"
 
 
-
-/*************************************************************************************************/
-/****************************          Call Back END            **********************************/
-/*************************************************************************************************/
-
-
-//int argc, char *argv[]
-
 Executive::Executive()
 {
   /**< Getter function pointer of type int void (*summer)(int,int). */
@@ -22,27 +14,45 @@ Executive::~Executive()
 
 void Executive::run1()
 {
-  printf("testinggggggg     run1\n");
+  
+
   while(is_Running)
   {
-    delay(20);
-    Test1();
+    if(PS_DetectFinger())
+    {
+      printf("welcome\n");
+      delay(20);
+      Test1();
     }
+
+  }
 }
 
 void Executive::run2()
 {
-
+  //wiringPiISR(key_pin, INT_EDGE_FALLING,&wwww(this));
   while(is_Running)
   {
-    delay(100);
-    Test2();
+    if(!digitalRead(key_pin))
+    {
+
+      printf("hi  new\n");
+      delay(300);
+      Test2();
     }
+
+    if(PS_DetectFinger())
+    {
+	printf("welcome\n");
+	delay(200);
+	Test1();
+    }
+  }
 }
 void Executive::start_run()
 {
   is_Running =1;
-  printf("testinggggggg\n");
+
   start();
   }
 void Executive::stop_run()

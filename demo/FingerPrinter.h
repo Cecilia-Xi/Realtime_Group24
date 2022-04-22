@@ -100,17 +100,10 @@ bool Get_search_CallBack(void* lpvoid, cb_search_ptr callback_param, uchar buffe
 
 class FingerPrint_CallBack {
 	public:
-		FingerPrint_CallBack();
-		~FingerPrint_CallBack();
-		virtual void cb_func(int a) =0;
-		virtual void cb_func2(int a) =0;
-		virtual void cb_search() =0;
-		
 
-		//int get_flag();
+		virtual void cb_func1() =0;
+		virtual void cb_func2() =0;
 
-		//void add_inFP();
-		//void search_inFP();
 	private:
 		
 
@@ -125,10 +118,12 @@ class FingerPrinter
 {
 
 	public:		
+		FingerPrinter();
+		~FingerPrinter();
 		/*************************************************************************************************/
 		/****************************     Call Back declairation        **********************************/
 		/*************************************************************************************************/		
-		
+		bool PS_DetectFinger();
 		/**
 		 * Registers the callback which is called whenever there is a sample.
 		 * \param cb Pointer to the callback interface.
@@ -149,16 +144,17 @@ class FingerPrinter
 		/**
 		 * Stop the data acquisition
 		 **/
-		void stop();
-				//Run the CB_Search func THREAD in callback style
-		void Test1();
-		
-		//Run the CB_Add func THREAD in callback style
-		void Test2();	
+		 void stop();	
 
 		/*************************************************************************************************/
 		/****************************     Call Back declairation  end      *******************************/
 		/*************************************************************************************************/
+		
+		//Run the CB_Search func THREAD in callback style
+		void Test1();
+		
+		//Run the CB_Add func THREAD in callback style
+		void Test2();
 	protected:
 			/**
 		 * Starts the data acquisition
@@ -169,6 +165,9 @@ class FingerPrinter
 		int running;
 		thread* thread_1 = nullptr;
 		thread* thread_2 = nullptr;
+		/*************************************************************************************************/
+		/****************************     Call Back declairation        **********************************/
+		/*************************************************************************************************/		
 		FingerPrint_CallBack* fp_callback_ptr = nullptr;
 		
 		//callback get image
@@ -195,17 +194,19 @@ class FingerPrinter
 		
 		static bool search_CALLBACK(void* lpvoid, uchar bufferID, int startPageID, int count, int* pPageID, int* pScore); 
 		
-		
 
 		
 		static void exec1(FingerPrinter* exe){
 			exe->run1();
+
 			//wiringPiISR(SWITCH, INT_EDGE_RISING, exe->Test1());
 		}
 		static void exec2(FingerPrinter* exe){
 			exe->run2();
 		}
-		
+		/*************************************************************************************************/
+		/****************************     Call Back declairation  end      *******************************/
+		/*************************************************************************************************/
 		/********************************* MAIN FUNCS **************************************/
 
 		bool PS_Setup(uint chipAddr, uint password);       // 0x00000000 ~ 0xffffffff
@@ -218,7 +219,7 @@ class FingerPrinter
 		bool PS_RegModel();
 		bool PS_StoreChar(uchar bufferID, int pageID);
 		
-		bool PS_DetectFinger();
+		//bool PS_DetectFinger();
 		bool waitUntilDetectFinger(int wait_time);   // 阻塞至检测到手指，最长阻塞wait_time毫秒
 		bool waitUntilNotDetectFinger(int wait_time);
 		
@@ -275,33 +276,7 @@ class FingerPrinter
 		//convert Hexadecimal char* to unit
 		unsigned int toUInt(const char* str);
 	
-		/*
-		bool PS_LoadChar(uchar bufferID, int pageID);
-		bool PS_UpChar(uchar bufferID, const char* filename);
-		bool PS_DownChar(uchar bufferID, const char* filename);
-		bool PS_UpImage(const char* filename);
-		bool PS_DownImage(const char* filename);
-		bool PS_DeleteChar(int startpageID, int count);
-		bool PS_WriteReg(int regID, int value);
-		bool PS_ReadSysPara();
-		bool PS_Enroll(int* pPageID);
-		bool PS_Identify(int* pPageID, int* pScore);
-		bool PS_SetPwd(uint passwd);   // 4bits  Integer 
-		bool PS_VfyPwd(uint passwd);   // 4bits  Integer 
-		bool PS_GetRandomCode(uint* pRandom);
-		bool PS_SetChipAddr(uint newAddr);
-		bool PS_ReadINFpage(uchar* pInfo, int size);
-		bool PS_WriteNotepad(int notePageID, uchar* pContent, int contentSize);
-		bool PS_ReadNotepad(int notePageID, uchar* pContent, int contentSize);
-		bool PS_HighSpeedSearch(uchar bufferID, int startPageID, int count, int* pPageID, int* pScore);
-		bool PS_ValidTempleteNum(int* pValidN);
-		bool PS_ReadIndexTable(int* indexList, int size);
-		bool PS_SetBaudRate(int value);
-		bool PS_SetSecureLevel(int level);
-		bool PS_SetPacketSize(int size);
-		bool PS_GetAllInfo();
-		bool PS_Flush();
-		*/
+
 		
 	};
 
