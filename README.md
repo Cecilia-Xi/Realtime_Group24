@@ -14,7 +14,7 @@
     <a href="https://youtu.be/Vcys27fCmiU">Youtube</a>
     &nbsp;
     &nbsp;
-    <a href="https://www.bilibili.com/">Bilibili</a>
+    <a href="https://www.bilibili.com/video/BV1wF411u73p/">Bilibili</a>
 </p>
 <p align="center">
    
