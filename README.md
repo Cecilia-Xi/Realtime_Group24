@@ -17,7 +17,9 @@
 
 # About the project
 As smart homes become very popular, using chips to automate the operation of the home has become very useful, so we designed a solution to program a Raspberry Pi with C++, then control an electronically controlled door lock through fingerprint recognition, and finally achieve Smart unlocking function.
-
+---
+links
+---
 ## Build environment
 + C++
 + github
