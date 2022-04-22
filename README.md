@@ -67,18 +67,25 @@ Installation Environment Requirements
 + WiringPi
 
 #### Install
++ Decompress WiringPi. h
+
 ```unzip WiringPi.zip```
+
++ Installing WiringPi. h
 
 ```cd WiringPi```
 
 ```./build```
++ Go to the demo for running the test file
 
 ```cd demo```
 
++ Compile and run
 ```make```
 
 ```./fp```
-
++ Upon entry it will run to recognise the fingerprint to unlock the door, based on the existing fingerprint library.
++ The external button in the settings allows you to pause the fingerprint recognition and go to the thread where the new fingerprint was recorded, and after successful recording, the fingerprint recognition is reawakened and the fingerprint detection continues.
 ## License
 see license information
 
