@@ -34,7 +34,7 @@ see license information
 · Shimeng Xi (https://github.com/xiguo0806)
 
 
-#update progress table
+# update progress table
 From 1.25 to 4.11.
 
 1: Starting from January 25th: Familiarize yourself with the pin-corresponding functions on the Raspberry Pi through examples.
