@@ -1,36 +1,126 @@
-## Realtime_Group24
+# Realtime_Group24
 
-We have designed a solution for programming a Raspberry Pi in C++ and then controlling an electronically controlled door lock via fingerprint recognition.
+## Fingerprint unlocking
 
-# Introduction
-This is an introduction to the devices used in this project
 
-# AS608.
-# Electronically controlled lock.
+<p align="center">
+    <a href = "https://github.com/xiguo0806/Realtime_Group24/blob/main/figure/fingerlogo.jpeg">
+        <img src="figure/fingerlogo.jpeg" alt="Logo" height="300">
+    </a>
+    <p align="center">Use fingerprint to unlock doors</p>
+</p>
 
-# Aims
-To rewrite a new AS608 framework capable of fingerprint entry and recognition by sending packets in the form of receiving packets based on the original AS608 writing framework, and then return the recognized function on the Raspberry Pi to perform the function of controlling the on and off on the door lock.
+<p align="center">
+    <a href="https://youtu.be/Vcys27fCmiU">Youtube</a>
+    &nbsp;
+    &nbsp;
+    <a href="https://www.bilibili.com/video/BV1wF411u73p/">Bilibili</a>
+</p>
+<p align="center">
+   
+</p>
 
-# Experimental environment
-Raspberry Pi, AS608 fingerprint recognition hardware, electronically controlled lock
-Development tool: C++
-Operating system: Ubuntu
+<p align="center">
+    <a href="https://github.com/xiguo0806/Realtime_Group24/issues" alt="Issues">
+        <img src="https://img.shields.io/github/issues/xiguo0806/Realtime_Group24.svg" /></a>
+    <a href="https://github.com/xiguo0806/Realtime_Group24/blob/main/LICENSE" alt="License">
+        <img src="https://img.shields.io/github/license/xiguo0806/Realtime_Group24.svg" /></a>
+    <a href="https://github.com/xiguo0806/Realtime_Group24/releases" alt="Tag">
+        <img src="https://img.shields.io/github/v/release/xiguo0806/Realtime_Group24.svg?color=blue&include_prereleases" alt="build status"></a>
+</p>
 
-# Progress schedule
+- [Realtime_Group24](#realtime_group24)
+  - [Fingerprint unlocking](#fingerprint-unlocking)
+- [About the project](#about-the-project)
+  - [Build environment](#build-environment)
+  - [Target](#target)
+  - [Lab environment](#lab-environment)
+    - [Electronic devices](#electronic-devices)
+    - [Start using](#start-using)
+      - [Install](#install)
+  - [License](#license)
+  - [Author](#author)
+    - [update progress table](#update-progress-table)
+    - [progress description](#progress-description)
+
+# About the project
+As smart homes become very popular, using chips to automate the operation of the home has become very useful, so we designed a solution to program a Raspberry Pi with C++, then control an electronically controlled door lock through fingerprint recognition, and finally achieve Smart unlocking function.
+
+## Build environment
++ C++
++ github
+
+## Target
+On the basis of the original AS608 writing framework, a new AS608 framework that can be fingerprinted and recognized is rewritten in the form of package receipt and package delivery, and then the recognized function is returned on the Raspberry Pi to execute the function of the control switch door lock.
+
+## Lab environment
+### Electronic devices
++ Raspberry Pi
++ AS608 
++ electric lock
++ relay
+
+
+
+### Start using
+Installation Environment Requirements
++ WiringPi
+
+#### Install
++ Decompress WiringPi. h
+
+```unzip WiringPi.zip```
+
++ Installing WiringPi. h
+
+```cd WiringPi```
+
+```./build```
++ Go to the demo for running the test file
+
+```cd demo```
+
++ Compile and run
+```make```
+
+```./fp```
++ Upon entry it will run to recognise the fingerprint to unlock the door, based on the existing fingerprint library.
++ The external button in the settings allows you to pause the fingerprint recognition and go to the thread where the new fingerprint was recorded, and after successful recording, the fingerprint recognition is reawakened and the fingerprint detection continues.
+## License
+see license information
+
+## Author
++ Xinyu Ren (https://github.com/Qizui)
+
++ Shaobo Yang (https://github.com/vincent972123)
+
++ Chongzhi Gao (https://github.com/c712g285)
+
++ Shimeng Xi (https://github.com/xiguo0806)
+
+---
+### update progress table
 From 1.25 to 4.11.
 
-1: Start on 25 January: familiarisation with the corresponding functions of the pins on the Raspberry Pi through examples.
+1: Starting from January 25th: Familiarize yourself with the pin-corresponding functions on the Raspberry Pi through examples.
 
-2: From 31 January: implementation of the functions of the various components (fingerprint reader, electric lock) using the pins; writing of the front-end controls; (setting tokens, etc.).
+2: From January 31st: use pins to implement functions of various components (fingerprint reader, electric lock); write front-end controls; (set tokens, etc.).
 
-3: Started 10 March: (x) (AS608 was too difficult to write, which delayed progress) Started 21 March: integration of the whole framework and debugging.
+3: Start on March 10: (x) (AS608 is too difficult to write, delaying the progress) Start on March 21: Integration and debugging of the entire framework.
 
-# Remarks
-I don't know how far I can go, the possibilities are not too good, but whatever the case the AS608 code refactoring module and the overall framework of the implementation of the callback and setter effect must be completed! Hopefully it will be done better subsequently.
+4：Since 28 March, functions in .c files already written in AS608 have been wrapped into classes in C++, and then attempts have been made to make the code more concise and clear using calls between files.
 
-# Progress notes
-3.21 The current version is just a more complete AS608 module, (splitting the string and converting it, calculating the checksum of the accepted packet, GetImage implementation, GenChar implementation, compare, find, store, read, delete fingerprints and other implementations,) (much more complex than expected. 😂) Then there is the use of pins for the start-up application control of the electric lock motor. Again a JS front end control script was written.
-However, all the above functions were only implemented on the Raspberry Pi and still not interactive.
+5：The package is progressing slowly, but was successfully completed on 12 April. The current goal is to implement a callback mechanism and multi-threading to achieve the effect of switching between threads for multiple functions.
 
-3.23 The current components for the updated motor section have been uploaded, so all components have been uploaded, but the code needs to be rewritten due to the requirement to change all external functions to classes to implement the callback mechanism for the entire code.
-As the current AS608 is written in c, much of the code is in the form of external functions to guide the control of the process, and the process actually needs to be called in the form of a class, so the task at hand is to rewrite the code
+6：The multi-threaded mechanism was nearing completion, but unfortunately one of the members developed a new crown, causing three members to collapse with high fever and the remaining member to accidentally cut his finger, bringing progress to a serious halt.
+
+7：On 19 April, 2 members returned to form and worked on the refactoring of the code, successfully completing the code using event drivers.
+
+8：On 20 February, we started to comment out various parts of the code to make it simple and easy to understand.
+
+### progress description
+3.21 The current version is just a relatively complete AS608 module, (split string and convert, calculate the checksum of the accepted package, GetImage implementation, GenChar implementation, compare, find, store, read, delete fingerprints, etc.) (Compared to It is much more complicated to imagine.😂) Then there is the start application that uses the pins to control the electric lock motor. Write a JS front-end control script again.
+However, all the above functions are only implemented on the Raspberry Pi and cannot be interacted yet.
+
+3.23 The current components of the updated motor part have been uploaded, so all components have been uploaded, but since all external functions need to be changed into classes to implement the callback mechanism of the entire code, the code needs to be rewritten.
+Since the current AS608 is written in c, many codes are in the form of external functions to guide the control of the process, and the process actually needs to be called in the form of a class, so the task at hand is to rewrite the code
