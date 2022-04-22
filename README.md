@@ -108,7 +108,15 @@ From 1.25 to 4.11.
 
 3: Start on March 10: (x) (AS608 is too difficult to write, delaying the progress) Start on March 21: Integration and debugging of the entire framework.
 
+4：Since 28 March, functions in .c files already written in AS608 have been wrapped into classes in C++, and then attempts have been made to make the code more concise and clear using calls between files.
 
+5：The package is progressing slowly, but was successfully completed on 12 April. The current goal is to implement a callback mechanism and multi-threading to achieve the effect of switching between threads for multiple functions.
+
+6：The multi-threaded mechanism was nearing completion, but unfortunately one of the members developed a new crown, causing three members to collapse with high fever and the remaining member to accidentally cut his finger, bringing progress to a serious halt.
+
+7：On 19 April, 2 members returned to form and worked on the refactoring of the code, successfully completing the code using event drivers.
+
+8：On 20 February, we started to comment out various parts of the code to make it simple and easy to understand.
 
 ### progress description
 3.21 The current version is just a relatively complete AS608 module, (split string and convert, calculate the checksum of the accepted package, GetImage implementation, GenChar implementation, compare, find, store, read, delete fingerprints, etc.) (Compared to It is much more complicated to imagine.😂) Then there is the start application that uses the pins to control the electric lock motor. Write a JS front-end control script again.
