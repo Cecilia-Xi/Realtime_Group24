@@ -1,24 +1,32 @@
 # Realtime_Group24
 ## Fingerprint unlocking
 
-[TOC]
+- [Realtime_Group24](#realtime_group24)
+  - [Fingerprint unlocking](#fingerprint-unlocking)
+  - [Build environment](#build-environment)
+  - [Target](#target)
+  - [Lab environment](#lab-environment)
+  - [License](#license)
+  - [Author](#author)
+    - [update progress table](#update-progress-table)
+    - [progress description](#progress-description)
 
 #About the project content
 As smart homes become very popular, using chips to automate the operation of the home has become very useful, so we designed a solution to program a Raspberry Pi with C++, then control an electronically controlled door lock through fingerprint recognition, and finally achieve Smart unlocking function.
 
-## build environment
+## Build environment
 · C++
 · github
 
 ## Target
 On the basis of the original AS608 writing framework, a new AS608 framework that can be fingerprinted and recognized is rewritten in the form of package receipt and package delivery, and then the recognized function is returned on the Raspberry Pi to execute the function of the control switch door lock.
 
-## lab environment
+## Lab environment
 Raspberry Pi, AS608 fingerprint recognition hardware, electric lock
 Development tools: C++
 Operating System: Ubuntu
 
-start using
+Start using
 Installation Environment Requirements
 · WiringPi
 
@@ -30,10 +38,13 @@ Install
 ## License
 see license information
 
-## author
+## Author
 · Xinyu Ren (https://github.com/Qizui)
-· Shaobo Yang ()
-· Chongzhi Gao ()
+
+· Shaobo Yang (https://github.com/vincent972123)
+
+· Chongzhi Gao (https://github.com/c712g285)
+
 · Shimeng Xi (https://github.com/xiguo0806)
 
 ---
