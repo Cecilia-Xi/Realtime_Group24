@@ -4,7 +4,7 @@
 
 
 <p align="center">
-    <a href = "https://github.com/xiguo0806/Realtime_Group24/figure/fingerlogo.jpeg">
+    <a href = "https://github.com/xiguo0806/Realtime_Group24/blob/main/figure/fingerlogo.jpeg">
         <img src="/files/guitar.png" alt="Logo" height="300">
     </a>
     <p align="center">Use fingerprint to unlock doors</p>
