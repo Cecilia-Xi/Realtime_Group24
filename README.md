@@ -67,9 +67,17 @@ Installation Environment Requirements
 + WiringPi
 
 #### Install
-```cd```
+```unzip WiringPi.zip```
 
-``` run```
+```cd WiringPi```
+
+```./build```
+
+```cd demo```
+
+```make```
+
+```./fp```
 
 ## License
 see license information
