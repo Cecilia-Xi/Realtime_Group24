@@ -3,15 +3,19 @@
 
 - [Realtime_Group24](#realtime_group24)
   - [Fingerprint unlocking](#fingerprint-unlocking)
+- [About the project](#about-the-project)
   - [Build environment](#build-environment)
   - [Target](#target)
   - [Lab environment](#lab-environment)
+    - [Electronic devices](#electronic-devices)
+    - [Start using](#start-using)
+      - [Install](#install)
   - [License](#license)
   - [Author](#author)
     - [update progress table](#update-progress-table)
     - [progress description](#progress-description)
 
-#About the project content
+# About the project
 As smart homes become very popular, using chips to automate the operation of the home has become very useful, so we designed a solution to program a Raspberry Pi with C++, then control an electronically controlled door lock through fingerprint recognition, and finally achieve Smart unlocking function.
 
 ## Build environment
@@ -22,15 +26,19 @@ As smart homes become very popular, using chips to automate the operation of the
 On the basis of the original AS608 writing framework, a new AS608 framework that can be fingerprinted and recognized is rewritten in the form of package receipt and package delivery, and then the recognized function is returned on the Raspberry Pi to execute the function of the control switch door lock.
 
 ## Lab environment
-Raspberry Pi, AS608 fingerprint recognition hardware, electric lock
-Development tools: C++
-Operating System: Ubuntu
+### Electronic devices
++ Raspberry Pi
++ AS608 
++ electric lock
++ relay
 
-Start using
+
+
+### Start using
 Installation Environment Requirements
-· WiringPi
++ WiringPi
 
-Install
+#### Install
 ```cd```
 
 ``` run```
@@ -39,13 +47,13 @@ Install
 see license information
 
 ## Author
-· Xinyu Ren (https://github.com/Qizui)
++ Xinyu Ren (https://github.com/Qizui)
 
-· Shaobo Yang (https://github.com/vincent972123)
++ Shaobo Yang (https://github.com/vincent972123)
 
-· Chongzhi Gao (https://github.com/c712g285)
++ Chongzhi Gao (https://github.com/c712g285)
 
-· Shimeng Xi (https://github.com/xiguo0806)
++ Shimeng Xi (https://github.com/xiguo0806)
 
 ---
 ### update progress table
