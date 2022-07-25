@@ -9,7 +9,7 @@ using namespace std;
 typedef unsigned char uchar;
 typedef unsigned int uint;
 
-typedef struct AS608_Module_Info
+typedef struct _FP_sensor_modle
 {
   uint status;      // Status registers 0
   uint model;       // sencor type 0-15
@@ -26,16 +26,16 @@ typedef struct AS608_Module_Info
 
   uint detect_pin;      // AS608 WAK pins with raspi gpios
   uint has_password;  
-} AS_608;
+} FP_sensor;
 
-typedef struct _Config {
+typedef struct _Configuration {
   unsigned int address;
   unsigned int password;
   int has_password;
   int baudrate;
   int detect_pin;
   char serial[16];
-} Config;
+} Configuration;
 
 
 class Lib
@@ -89,4 +89,7 @@ int Calibrate(const uchar* buf, int size);
 	private:
 	
 	};
+  
+
+
 #endif

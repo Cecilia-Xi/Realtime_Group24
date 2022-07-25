@@ -1,8 +1,8 @@
-#include "lib.h"
+#include "Executive.h"
 #include <iostream>
 
 int main(int argc, char *argv[])
 {	
-	Lib l;
+	Executive e1;
 	return 0;
 }
