@@ -3,9 +3,15 @@
 
 #include "lib.h"
 #include "utils.h"
+using namespace std;
 
-class Executive{
+class Executive {
+public:
+	Executive(){};
+	~Executive(){};
 	void run();
-	};
+private:
+
+};
 	
 #endif

@@ -1,4 +1,4 @@
-fp: main.o Executive.o lib.o utils.o
+fp: main.o Executive.o lib.o utils.o 
 	g++ -std=c++11 -g -Wall main.o Executive.o lib.o utils.o -o fp -lwiringPi -pthread
 
 main.o: main.cpp Executive.h
@@ -12,6 +12,6 @@ lib.o: lib.h lib.cpp
 	
 utils.o: utils.h utils.cpp 
 	g++ -std=c++11 -g -Wall -c utils.cpp
-	
+
 clean: 
 	rm *.o fp

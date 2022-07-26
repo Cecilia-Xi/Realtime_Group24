@@ -4,17 +4,11 @@
 #include <string.h>
 #include <stdio.h>
 
-typedef struct _Config {
-  unsigned int address;
-  unsigned int password;
-  int has_password;
-  int baudrate;
-  int detect_pin;
-  char serial[16];
-} Config;
-
 class Utils {
   public:
+  	Utils(){};
+    ~Utils(){};
+    
     // 去除文件中所有空白字符(空格和制表符)
     // 仅适合本例，用于处理配置文件，数据量很小
     void trimSpaceInFile(const char* filename);
@@ -30,6 +24,6 @@ class Utils {
     unsigned int toUInt(const char* str);
   private:
   
-  };
+};
 
 #endif
