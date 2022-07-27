@@ -83,7 +83,6 @@ bool Lib::RecvReply(uchar* hex, int size) {
 }
 
 
-
 bool Lib::SendPacket(uchar* pData, int validDataSize) {
   if (g_as608.packet_size <= 0)
     return false;
@@ -95,7 +94,7 @@ bool Lib::SendPacket(uchar* pData, int validDataSize) {
   int realDataSize = validDataSize * realPacketSize / g_as608.packet_size;  // 总共需要发送的数据大小
 
   // 构造数据包
-  uchar* writeBuf = new uchar;
+  uchar* writeBuf = (uchar*)malloc(realPacketSize);
   writeBuf[0] = 0xef;  // 包头
   writeBuf[1] = 0x01;  // 包头
   Split(g_as608.chip_addr, writeBuf+2, 4);  // 芯片地址
@@ -103,7 +102,7 @@ bool Lib::SendPacket(uchar* pData, int validDataSize) {
 
   int offset     = 0;  // 已发送的有效数据
   int writeCount = 0;  // 已发送的实际数据
-  //talk with fp sensor
+
   while (true) {
     // 填充数据区域
     memcpy(writeBuf+9, pData+offset, g_as608.packet_size);
@@ -141,9 +140,8 @@ bool Lib::SendPacket(uchar* pData, int validDataSize) {
       break;
   } // end while
 
-  //delete * writeBuf;
+  free(writeBuf);
   g_error_code = 0x00;
-  
   return true; 
 }
 
@@ -154,11 +152,12 @@ bool Lib::RecvPacket(uchar* pData, int validDataSize) {
   int realDataSize = validDataSize * realPacketSize / g_as608.packet_size;  // 总共需要接受的数据大小
 
   uchar readBufTmp[8] = { 0 };  // 每次read至多8个字节，追加到readBuf中
-  uchar* readBuf = new uchar; // 收满realPacketSize字节，说明收到了一个完整的数据包，追加到pData中
+  uchar* readBuf = (uchar*)malloc(realPacketSize); // 收满realPacketSize字节，说明收到了一个完整的数据包，追加到pData中
 
   int availSize      = 0;
   int readSize       = 0;
   int readCount      = 0;
+
   int readBufSize    = 0;
   int offset         = 0;
   int timeCount      = 0;
@@ -215,7 +214,7 @@ bool Lib::RecvPacket(uchar* pData, int validDataSize) {
 
       // 接受到 validDataSize 个字节的有效数据，但仍未收到结束包，
       if (readCount >= realDataSize) {
-        //delete * readBuf;
+        free(readBuf);
         g_error_code = 0xC4;
         return false;
       }
@@ -228,7 +227,7 @@ bool Lib::RecvPacket(uchar* pData, int validDataSize) {
     }
   } // end while
 
-  //delete * readBuf;
+  free(readBuf);
 
   // 最大阻塞时间内未接受到指定大小的数据，返回false
   if (readCount < realDataSize) {
@@ -237,7 +236,6 @@ bool Lib::RecvPacket(uchar* pData, int validDataSize) {
   }
   
   g_error_code = 0x00;
-  
   return true; 
 }
 

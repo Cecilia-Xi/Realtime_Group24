@@ -6,16 +6,24 @@
 #include "configuration/utils/config_struct.h"
 using namespace std;
 
-class Executive : FingerPrint {
+class Executive {
 public:
-	Configuration g_config;  
-	
-	Executive(){};
-	~Executive(){};
-	void run();
-	void lockerControl();
-private:
 
+	Executive();
+	~Executive();
+	
+	void run();
+	void initialize();
+	void lockerControl();
+
+	void printConfig();
+	bool readConfig(); 
+	void asyncConfig();
+	void writeConfig();
+
+private:
+	Configuration g_config;  
+	FingerPrint g_fp;
 };
 	
 #endif

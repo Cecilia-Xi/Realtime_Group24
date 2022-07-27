@@ -14,9 +14,138 @@ void FingerPrint::run(){
 	cout<<"in running";
 }
 
+void FingerPrint::search(){
+  printf("Please put your finger on the module.\n");
+  PS_GetImage() || PS_Exit();
+  PS_GenChar(1) || PS_Exit();
+
+  int pageID = 0, score = 0;
+  if (!PS_Search(1, 0, 300, &pageID, &score))
+    PS_Exit();
+  else
+    printf("Matched! pageID=%d score=%d\n", pageID, score);
+}
+  
+
+void FingerPrint::add () {
+    printf("Please put your finger on the module.\n");
+    if (waitUntilDetectFinger(5000)) {
+      delay(500);
+      PS_GetImage() || PS_Exit();
+      PS_GenChar(1) || PS_Exit();
+    }
+    else {
+      printf("Error: Didn't detect finger!\n");
+      exit(1);
+    }
+
+    // 判断用户是否抬起了手指，
+    printf("Ok.\nPlease raise your finger!\n");
+    if (waitUntilNotDetectFinger(5000)) {
+      delay(100);
+      printf("Ok.\nPlease put your finger again!\n");
+      // 第二次录入指纹
+      if (waitUntilDetectFinger(5000)) {
+        delay(500);
+        PS_GetImage() || PS_Exit();
+        PS_GenChar(2) || PS_Exit();
+	
+      }
+      else {
+        printf("Error: Didn't detect finger!\n");
+        exit(1);
+      }
+    }
+    else {
+      printf("Error! Didn't raise your finger\n");
+      exit(1);
+    }
+
+    int score = 0;
+    if (PS_Match(&score)) {
+      printf("Matched! score=%d\n", score);
+    }
+    else {
+      printf("Not matched, raise your finger and put it on again.\n");
+      exit(1);
+    }
+    
+    if (g_error_code != 0x00)
+      PS_Exit();
+
+    // 合并特征文件
+    PS_RegModel() || PS_Exit();
+    PS_StoreChar(2, auto_page_id) || PS_Exit();
 
 
+    printf("OK! New fingerprint saved to pageID=%d\n", ++auto_page_id);
+  }
 
+
+bool FingerPrint::setUp(uint chipAddr, uint password) {
+
+  g_as608.chip_addr = chipAddr;
+  g_as608.password  = password;
+  if (g_verbose == 1)
+    printf("-------------------------Initializing-------------------------\n");
+  //verify the password 
+  if (g_as608.has_password) {
+    if (!PS_VfyPwd(password))
+     return false;
+  }
+
+  // obtain the size of datapack and the baud rate ec.
+  if (PS_ReadSysPara() && g_as608.packet_size > 0) {
+    if (g_verbose == 1)
+      printf("-----------------------------Done-----------------------------\n");
+    return true;
+  }
+
+  if (g_verbose == 1)
+    printf("-----------------------------Done-----------------------------\n");
+  g_error_code = 0xC7;
+  return PS_Exit();
+}
+
+
+bool FingerPrint::PS_VfyPwd(uint pwd) { 
+  int size = GenOrder(0x13, "%4d", pwd); 
+  SendOrder(g_order, size);
+
+  return (RecvReply(g_reply, 12) && Check(g_reply, 12));
+}
+
+bool FingerPrint::PS_ReadSysPara() {
+  int size = GenOrder(0x0f, "");
+  SendOrder(g_order, size);
+  
+  return (RecvReply(g_reply, 28) &&
+          Check(g_reply, 28) &&
+          Merge(&g_as608.status,       g_reply+10, 2) &&
+          Merge(&g_as608.model,        g_reply+12, 2) && 
+          Merge(&g_as608.capacity,     g_reply+14, 2) &&
+          Merge(&g_as608.secure_level, g_reply+16, 2) &&
+          Merge(&g_as608.chip_addr,    g_reply+18, 4) &&
+          Merge(&g_as608.packet_size,  g_reply+22, 2) &&
+          Merge(&g_as608.baud_rate,    g_reply+24, 2) &&
+          (g_as608.packet_size = 32 * (int)pow(2, g_as608.packet_size)) &&
+          (g_as608.baud_rate *= 9600)
+         );
+}
+
+
+bool FingerPrint::PS_Search(uchar bufferID, int startPageID, int count, int* pPageID, int* pScore) {
+
+  int size = GenOrder(0x04, "%d%2d%2d", bufferID, startPageID, count);
+  SendOrder(g_order, size);
+
+  // receive the response pack, check the comfirmation pack and verify sum 
+  return ( RecvReply(g_reply, 16) && 
+           Check(g_reply, 16) && 
+           (Merge((uint*)pPageID, g_reply+10, 2)) &&  // assign value to pageID, return true
+           (Merge((uint*)pScore,  g_reply+12, 2))     // assign value to score, return true
+        );
+}
 
 bool FingerPrint::PS_GetImage() {
   int size = GenOrder(0x01, "");
@@ -28,7 +157,6 @@ bool FingerPrint::PS_GetImage() {
   return (RecvReply(g_reply, 12) && Check(g_reply, 12));
 
 }
-
 
 bool FingerPrint::PS_GenChar(uchar bufferID) {
   int size = GenOrder(0x02, "%d", bufferID);
@@ -49,7 +177,6 @@ bool FingerPrint::PS_Match(int* pScore) {
 }
 
 
-
 bool FingerPrint::PS_RegModel() {
   int size = GenOrder(0x05, "");
   SendOrder(g_order, size);
@@ -58,7 +185,6 @@ bool FingerPrint::PS_RegModel() {
   return (RecvReply(g_reply, 12) &&
       Check(g_reply, 12));
 }
-
 
 bool FingerPrint::PS_StoreChar(uchar bufferID, int pageID) {
   int size = GenOrder(0x06, "%d%2d", bufferID, pageID);
@@ -69,22 +195,10 @@ bool FingerPrint::PS_StoreChar(uchar bufferID, int pageID) {
         Check(g_reply, 12));
 }
 
-bool FingerPrint::PS_Search(uchar bufferID, int startPageID, int count, int* pPageID, int* pScore) {
-
-  int size = GenOrder(0x04, "%d%2d%2d", bufferID, startPageID, count);
-  SendOrder(g_order, size);
-
-  // receive the response pack, check the comfirmation pack and verify sum 
-  return ( RecvReply(g_reply, 16) && 
-           Check(g_reply, 16) && 
-           (Merge((uint*)pPageID, g_reply+10, 2)) &&  // assign value to pageID, return true
-           (Merge((uint*)pScore,  g_reply+12, 2))     // assign value to score, return true
-        );
-}
-
 bool FingerPrint::PS_DetectFinger() {
   return digitalRead(g_as608.detect_pin) == HIGH;
 }
+
 
 // Block until a finger is detected, the longest block wait_time is milliseconds
 bool FingerPrint::waitUntilDetectFinger(int wait_time) {
@@ -130,6 +244,12 @@ bool FingerPrint::PS_Exit()
 {
   printf("ERROR! code=%02X, desc=%s\n", g_error_code,  PS_GetErrorDesc());
   return true;
+}
+void FingerPrint::atExitFunc() {
+  if (g_verbose == 1)
+    printf("Exit\n");
+  if (g_fd > 0)
+    serialClose(g_fd); 
 }
 
 // obtain the defination of error code of g_error_code and assign value to g_error_desc
