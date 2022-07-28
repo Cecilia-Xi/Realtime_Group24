@@ -220,7 +220,7 @@ void Executive::initialize() {
   if (!readConfig())
     //exit(1);
 
-  if (g_fp.g_verbose == 1)
+  //if (g_fp.g_verbose == 1)
     //printConfig();
 
   if (-1 == wiringPiSetup()) {

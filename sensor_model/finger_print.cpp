@@ -10,6 +10,7 @@ FingerPrint::~FingerPrint(){
 
 }
 
+
 void FingerPrint::run(){
 	cout<<"in running";
 }
