@@ -1,5 +1,6 @@
 #include "Executive.h"
 
+/*
 Executive::Executive(){
 	initialize();
 	g_fp.setUp(g_config.address, g_config.password);
@@ -18,11 +19,8 @@ void Executive::run() {
 
 	printf("asd%d\n",key_pin);
 
-	while(1)
-	{
+	if(g_fp.PS_DetectFinger())
 		g_fp.search();
-		}
-	
 }
 
 void Executive::initialize() {
@@ -107,11 +105,11 @@ bool Executive::readConfig() {
     fgets(line, 32, fp);
     
     
-    if (tmp = strtok(line, "="))
+    if (tmp == strtok(line, "="))
       trim(tmp, key);
     else
       continue;
-    if (tmp = strtok(NULL, "="))
+    if (tmp == strtok(NULL, "="))
       trim(tmp, value);
     else
       continue;
@@ -194,3 +192,59 @@ void Executive::writeConfig() {
 
   fclose(fp);
 }
+*/
+
+Executive::Executive(){
+	initialize();
+	g_fp.setUp(g_config.address, g_config.password);
+
+	}
+	
+Executive::~Executive(){
+
+	g_fp.atExitFunc();
+	}
+
+void Executive::run() {
+
+	pinMode(key_pin,INPUT);
+	pullUpDnControl(key_pin,PUD_UP);
+
+	printf("asd%d\n",key_pin);
+
+	if(g_fp.PS_DetectFinger())
+		g_fp.search();
+}
+
+void Executive::initialize() {
+  if (!readConfig())
+    //exit(1);
+
+  if (g_fp.g_verbose == 1)
+    //printConfig();
+
+  if (-1 == wiringPiSetup()) {
+    printf("wiringPi setup failed!\n");
+    exit(0);
+  }
+
+  pinMode(g_config.detect_pin, INPUT);
+
+  if((g_fp.g_fd = serialOpen(g_config.serial, g_config.baudrate)) < 0)	{
+    fprintf(stderr,"Unable to open serial device: %s\n", strerror(errno));
+    exit(0);
+  }
+}
+
+void Executive::lockerControl() {
+  pinMode (SWITCH,OUTPUT);
+  printf("FBI open The Door!\n");
+  digitalWrite (SWITCH,LOW);//set it initially as high, is closed
+
+  delay(1000);
+  digitalWrite (SWITCH,HIGH);
+
+  pinMode(g_config.detect_pin, INPUT);
+}
+
+

@@ -3,9 +3,11 @@
 
 #include "../sensor_model/lib/lib.h"
 #include "utils/utils.h"
+#include "utils/config_struct.h"
+#include "../sensor_model/finger_print.h"
 using namespace std;
 
-class Config  {
+class Config : public FingerPrint  {
 public:
 
 	void atExitFunc();
@@ -15,6 +17,8 @@ public:
 	void writeConfig();
 private:
 
+	Configuration g_config;  
+	FingerPrint g_fp;
 };
 	
 #endif

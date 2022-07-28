@@ -108,7 +108,7 @@ bool Lib::SendPacket(uchar* pData, int validDataSize) {
     memcpy(writeBuf+9, pData+offset, g_as608.packet_size);
 
     // 数据包 标志
-    if (offset + g_as608.packet_size < validDataSize)
+    if (int(offset + g_as608.packet_size) < validDataSize)
       writeBuf[6] = 0x02;  // 结束包(最后一个数据包)
     else
       writeBuf[6] = 0x08;  // 普通数据包

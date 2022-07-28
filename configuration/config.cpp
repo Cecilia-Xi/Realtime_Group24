@@ -1,5 +1,5 @@
 #include "config.h"
-/*
+
 void Config::asyncConfig() {
   g_as608.detect_pin   = g_config.detect_pin;
   g_as608.has_password = g_config.has_password;
@@ -49,11 +49,11 @@ bool Config::readConfig() {
     fgets(line, 32, fp);
     
     
-    if (tmp = strtok(line, "="))
+    if (tmp == strtok(line, "="))
       trim(tmp, key);
     else
       continue;
-    if (tmp = strtok(NULL, "="))
+    if (tmp == strtok(NULL, "="))
       trim(tmp, value);
     else
       continue;
@@ -145,4 +145,4 @@ void Config::writeConfig() {
 
   fclose(fp);
 }
-*/
+

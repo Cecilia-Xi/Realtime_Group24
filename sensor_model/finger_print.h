@@ -27,7 +27,7 @@ public:
 	void search();
 	void add();
 	bool setUp(uint chipAddr, uint password);       // 0x00000000 ~ 0xffffffff
-
+	bool PS_DetectFinger();
 	void atExitFunc();
 	
 private:
@@ -42,7 +42,7 @@ private:
 	bool PS_Match(int* pScore);
 	bool PS_RegModel();
 	bool PS_StoreChar(uchar bufferID, int pageID);
-	bool PS_DetectFinger();
+	
 	
 	bool waitUntilDetectFinger(int wait_time);   // 阻塞至检测到手指，最长阻塞wait_time毫秒
 	bool waitUntilNotDetectFinger(int wait_time);
