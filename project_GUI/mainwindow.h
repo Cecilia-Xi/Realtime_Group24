@@ -19,6 +19,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void qmessage();
+    void qmessage2();
 private slots:
     void on_pushButton_clicked();
 

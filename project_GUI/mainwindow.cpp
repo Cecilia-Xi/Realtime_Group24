@@ -33,20 +33,32 @@ MainWindow::~MainWindow()
 }
 
 
+void MainWindow::qmessage()
+{
+    QMessageBox::information(this, "Detect", "put your finger!");
+}
+void MainWindow::qmessage2()
+{
+    QMessageBox::information(this, "Add", "put your finger!");
+}
 void MainWindow::on_pushButton_clicked()
 {
     Detect_Thread dtct_thd;
+    emit dtct_thd.start();
+    connect(this, SIGNAL(dtct_thd.start()), this, SLOT(qmessage()),Qt::QueuedConnection);
 
-    QMessageBox::information(this, "Detect", "put your finger!");
-    dtct_thd.start();
+    //dtct_thd.start();
     dtct_thd.join();
 }
 
 void MainWindow::on_pushButton_2_clicked()
 {
-        Add_Thread add_thd;
-    QMessageBox::information(this, "Add", "put your finger!");
-    add_thd.start();
+    Add_Thread add_thd;
+    emit add_thd.start();
+    connect(this, SIGNAL(dtct_thd.start()), this, SLOT(qmessage2()),Qt::QueuedConnection);
+
+
+    //add_thd.start();
     add_thd.join();
 }
 
