@@ -10,7 +10,7 @@ typedef struct _Configuration {
   int baudrate;
   int detect_pin;
   char serial[16];
-} Configuration;
+} Config;
 
 #endif
 
