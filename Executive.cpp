@@ -1,26 +1,55 @@
 #include "Executive.h"
 
-/*
 Executive::Executive(){
-	initialize();
-	g_fp.setUp(g_config.address, g_config.password);
-
 	}
 	
 Executive::~Executive(){
-
 	g_fp.atExitFunc();
 	}
+  
+  
+void Executive::EXE_run() {
+  initialize();
+	g_fp.setUp(g_config.address, g_config.password);
 
-void Executive::run() {
+  if (-1 == wiringPiSetup()) {
+  printf("wiringPi setup failed!\n");
+  exit(0);
+  }
 
-	pinMode(key_pin,INPUT);
-	pullUpDnControl(key_pin,PUD_UP);
+  pinMode(key_pin,INPUT);
+  pullUpDnControl(key_pin,PUD_UP);
+  //finger print sensor is ready now//
+  
+  //run_withQT();
+  //run_plain();
+  
+}
 
-	printf("asd%d\n",key_pin);
+void Executive::search_withQT() {
+  delay(30);
+  if(!digitalRead(g_fp.PS_DetectFinger())){
+      g_fp.search();
+  }
+  else{
+    printf("NO FINGER ON SENSOR");
+  }
+}
 
-	if(g_fp.PS_DetectFinger())
-		g_fp.search();
+void Executive::add_withQT() {
+  g_fp.add();
+}
+
+void Executive::run_plain() {
+	while(1){
+    delay(100);
+    if(digitalRead(g_fp.PS_DetectFinger())){
+        printf("now pressed, pin value is :%d\n",digitalRead(g_fp.PS_DetectFinger()));
+    }
+    else{
+      printf("NOT PRESS!!, pin value is :%d\n",digitalRead(g_fp.PS_DetectFinger()));
+    }
+  }
 }
 
 void Executive::initialize() {
@@ -104,15 +133,15 @@ bool Executive::readConfig() {
   while (!feof(fp)) {
     fgets(line, 32, fp);
     
-    
-    if (tmp == strtok(line, "="))
+    if (tmp = strtok(line, "="))
       trim(tmp, key);
     else
       continue;
-    if (tmp == strtok(NULL, "="))
+    if (tmp = strtok(NULL, "="))
       trim(tmp, value);
     else
       continue;
+
     while (!tmp)
       tmp = strtok(NULL, "=");
 
@@ -192,59 +221,3 @@ void Executive::writeConfig() {
 
   fclose(fp);
 }
-*/
-
-Executive::Executive(){
-	initialize();
-	g_fp.setUp(g_config.address, g_config.password);
-
-	}
-	
-Executive::~Executive(){
-
-	g_fp.atExitFunc();
-	}
-
-void Executive::run() {
-
-	pinMode(key_pin,INPUT);
-	pullUpDnControl(key_pin,PUD_UP);
-
-	printf("asd%d\n",key_pin);
-
-	if(g_fp.PS_DetectFinger())
-		g_fp.search();
-}
-
-void Executive::initialize() {
-  if (!readConfig())
-    //exit(1);
-
-  //if (g_fp.g_verbose == 1)
-    //printConfig();
-
-  if (-1 == wiringPiSetup()) {
-    printf("wiringPi setup failed!\n");
-    exit(0);
-  }
-
-  pinMode(g_config.detect_pin, INPUT);
-
-  if((g_fp.g_fd = serialOpen(g_config.serial, g_config.baudrate)) < 0)	{
-    fprintf(stderr,"Unable to open serial device: %s\n", strerror(errno));
-    exit(0);
-  }
-}
-
-void Executive::lockerControl() {
-  pinMode (SWITCH,OUTPUT);
-  printf("FBI open The Door!\n");
-  digitalWrite (SWITCH,LOW);//set it initially as high, is closed
-
-  delay(1000);
-  digitalWrite (SWITCH,HIGH);
-
-  pinMode(g_config.detect_pin, INPUT);
-}
-
-

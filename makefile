@@ -1,5 +1,3 @@
-
-
 fp: main.o lib.o utils.o finger_print.o Executive.o config.o
 	g++ -std=c++11 -g -Wall main.o lib.o utils.o finger_print.o Executive.o config.o -o fp -lwiringPi -pthread
 
@@ -22,5 +20,4 @@ utils.o: configuration/utils/utils.h configuration/utils/utils.cpp
 	g++ -std=c++11 -g -Wall -c configuration/utils/utils.cpp
 
 clean: 
-	
 	rm *.o fp
