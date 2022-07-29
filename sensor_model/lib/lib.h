@@ -44,13 +44,7 @@ public:
   * param: num, buffer, width
   * return: none
   */
-  /*
-  * 继承人：父亲
-  * intro：用于计算地址,
-  *   num=0xa0b1c2d3，改为0x0a, 0x1b, 0xc2, 0xd3
-  * 参数：整数，缓冲，宽度
-  * 返回：无
-  */
+
   void Split(uint num, uchar* buf, int count);
 
   /*
@@ -59,13 +53,6 @@ public:
   *  num=xa0, 0xb1, 0xc2, 0xd3, merge to ee0xa0b1c2d3
   * param: num, address, width
   * return: true after merge succeed
-  */
-  /*
-  * 继承人：父亲
-  * intro：用于计算地址，
-  *   num=xa0, 0xb1, 0xc2, 0xd3, 合并到ee0xa0b1c2d3
-  * 参数：无符号整数指针、无符号字符指针 地址、宽度
-  * 返回：合并成功后为真
   */
   bool Merge(uint* num, const uchar* startAddr, int count);
   
@@ -76,13 +63,7 @@ public:
   * param: buffer, width
   * return: sum of buffer
   */
-  /*
-  * delay: 0s
-  * 继承人：父亲
-  * 介绍：用于计算缓冲区
-  * 参数：缓冲区，宽度
-  * 返回：缓冲区的总和
-  */
+
   int Calibrate(const uchar* buf, int size);
     
   /*
@@ -91,13 +72,6 @@ public:
   * intro: used to check buffer data, using Merge() and CAlibrate()
   * param: buffer, width
   * return: true if buffer compare is correct
-  */
-  /*
-  * delay: 0s
-  * 继承人：父亲
-  * 介绍：用于检查缓冲区数据，使用 Merge() 和 CAlibrate()
-  * 参数：缓冲区，宽度
-  * 返回：如果缓冲区比较正确，则返回 true
   */
   bool Check(const uchar* buf, int size);
   
@@ -111,12 +85,6 @@ public:
   * param: order, width
   * return: none
   */
-  /*
-  * 继承人：父亲
-  * 介绍：用于向传感器发送订单
-  * 参数：顺序，宽度
-  * 返回：无
-  */
   int SendOrder(const uchar* order, int size);
   
   /*
@@ -125,13 +93,6 @@ public:
   * intro: used to get reply from sensor after send order, work with SendOrder()
   * param: hex data, width
   * return: false if delay too long or data over the required size
-  */
-  /*
-  * 延迟：最多 3 秒等待得到回复
-  * 继承人：父亲
-  * 介绍：用于在发送订单后从传感器获取回复，与 SendOrder() 一起使用
-  * 参数：十六进制数据，宽度
-  * 返回：如果延迟时间过长或数据超过所需大小，则返回 false
   */
   bool RecvReply(uchar* hex, int size);
 
@@ -142,27 +103,14 @@ public:
   * param: uchar data packet, width
   * return: true after finish
   */
-  /*
-  * 延迟：0s 
-  * 继承：父亲 
-  * 介绍：用于发送数据包到传感器，使用Recv Packet() 
-  * 参数：字符数据包，宽度 
-  * 返回：完成后为真 
-  */
   bool SendPacket(uchar* pData, int validDataSize);
+  
   /*
   * delay: 0
   * inheri: father
   * intro: used to get data packet from the sensor, work with RecvPacket()
   * param: uchar data packet, width
   * return: true if get full packet back
-  */
-  /*
-  * 延迟：0
-  * 继承人：父亲
-  * 介绍：用于从传感器获取数据包，使用 RecvPacket()
-  * 参数：uchar 数据包，宽度
-  * 返回：如果返回完整的数据包，则返回 true
   */
   bool RecvPacket(uchar* pData, int validDataSize);
 
@@ -194,13 +142,6 @@ private:
   * param: done, all
   * return: none
   */
-  /*
-  * 延迟：0s
-  * 继承人：父亲
-  * 介绍：处理打印机，（完成/全部）*100%
-  * 参数：完成，全部
-  * 返回：无
-  */
   void PrintProcess(int done, int all);
   /*
   * delay: 0s
@@ -208,13 +149,6 @@ private:
   * intro: debug printer
   * param: buffer, width
   * return: none
-  */
-  /*
-   * 延迟：0s
-   * 继承人：父亲
-   * 介绍：调试打印机
-   * 参数：缓冲区，宽度
-   * 返回：无
   */
   void PrintBuf(const uchar* buf, int size);
 	

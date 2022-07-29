@@ -11,19 +11,21 @@ using namespace std;
 
 #define MAX_BUF 512
 #define SYSFS_GPIO_DIR "/sys/class/gpio"
-#define key_pin 29
+
 #define SWITCH 7
+#define key_pin 29
 
 class FingerPrint : public Lib {
 	
 public:		
+
+
 	int auto_page_id = 0;
 	uchar g_reply[64]; // 模块的应答包
 	
 	FingerPrint();
 	~FingerPrint();
-	
-	void run();
+
 	void search();
 	void add();
 	bool setUp(uint chipAddr, uint password);       // 0x00000000 ~ 0xffffffff

@@ -1,18 +1,10 @@
 #include "finger_print.h"
 
 FingerPrint::FingerPrint(){
-	//g_order[64] = { 0 }; // 发送给模块的指令包
-	//g_reply[64] = { 0 }; // 模块的应答包 
-	cout<<"auto\n";
 }
 	
 FingerPrint::~FingerPrint(){
 
-}
-
-
-void FingerPrint::run(){
-	cout<<"in running";
 }
 
 void FingerPrint::search(){

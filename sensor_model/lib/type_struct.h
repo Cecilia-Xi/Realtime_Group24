@@ -24,25 +24,4 @@ typedef struct _FP_sensor_modle {
   uint has_password;  
 } FP_sensor;
 
-
-
-
-
-/*
-extern int auto_page_id;
-
-extern FP_sensor g_as608;
-extern Configuration g_config;  
-
-extern int   g_fd;          // 文件描述符，即open()函数打开串口的返回值
-extern int   g_verbose;     // 输出信息的详细程度
-extern char  g_error_desc[128]; // 错误代码的含义
-extern uchar g_error_code;      // 模块返回的确认码，如果函数返回值不为true，读取此变量
-
-extern uchar g_order[64]; // 发送给模块的指令包
-extern uchar g_reply[64]; // 模块的应答包
-* 
-* 
-*/
-//#include "sensor_modle.cpp"
 #endif
