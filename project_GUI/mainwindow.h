@@ -32,8 +32,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void qmessage();
-    void qmessage2();
+
     void detect();
     void add();
 

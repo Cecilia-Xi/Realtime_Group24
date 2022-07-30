@@ -29,7 +29,7 @@ void FingerPrint::add () {
     }
     else {
       printf("Error: Didn't detect finger!\n");
-      exit(1);
+      PS_Exit();
     }
 
     // 判断用户是否抬起了手指，
@@ -46,12 +46,12 @@ void FingerPrint::add () {
       }
       else {
         printf("Error: Didn't detect finger!\n");
-        exit(1);
+        PS_Exit();
       }
     }
     else {
       printf("Error! Didn't raise your finger\n");
-      exit(1);
+      PS_Exit();
     }
 
     int score = 0;
@@ -60,7 +60,7 @@ void FingerPrint::add () {
     }
     else {
       printf("Not matched, raise your finger and put it on again.\n");
-      exit(1);
+      PS_Exit();
     }
     
     if (g_error_code != 0x00)

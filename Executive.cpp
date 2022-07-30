@@ -27,6 +27,7 @@ void Executive::EXE_run() {
 }
 
 void Executive::search_withQT() {
+    //printf("1");
     g_fp.search();
 }
 
