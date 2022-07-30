@@ -1,22 +1,26 @@
 #include "finger_print.h"
 
-FingerPrint::FingerPrint(){
+FingerPrint::FingerPrint(CallBack* mCopy_CallBack){
+  m_CallBack = mCopy_CallBack;
 }
+
 	
 FingerPrint::~FingerPrint(){
 
 }
 
-void FingerPrint::search(){
+bool FingerPrint::search(){
   printf("Please put your finger on the module.\n");
   PS_GetImage() || PS_Exit();
   PS_GenChar(1) || PS_Exit();
 
   int pageID = 0, score = 0;
   if (!PS_Search(1, 0, 300, &pageID, &score))
-    PS_Exit();
-  else
-    printf("Matched! pageID=%d score=%d\n", pageID, score);
+    return false;
+  
+  printf("Matched! pageID=%d score=%d\n", pageID, score);
+  m_CallBack->checkSEARCH(pageID);
+  return true;
 }
   
 
@@ -29,7 +33,7 @@ void FingerPrint::add () {
     }
     else {
       printf("Error: Didn't detect finger!\n");
-      PS_Exit();
+      exit(1);
     }
 
     // 判断用户是否抬起了手指，
@@ -42,25 +46,25 @@ void FingerPrint::add () {
         delay(500);
         PS_GetImage() || PS_Exit();
         PS_GenChar(2) || PS_Exit();
-	
       }
       else {
         printf("Error: Didn't detect finger!\n");
-
+        exit(1);
       }
     }
     else {
       printf("Error! Didn't raise your finger\n");
-      PS_Exit();
+      exit(1);
     }
 
     int score = 0;
     if (PS_Match(&score)) {
       printf("Matched! score=%d\n", score);
+      m_CallBack->checkADD(auto_page_id, score) ;
     }
     else {
       printf("Not matched, raise your finger and put it on again.\n");
-      PS_Exit();
+      exit(1);
     }
     
     if (g_error_code != 0x00)
@@ -69,7 +73,6 @@ void FingerPrint::add () {
     // 合并特征文件
     PS_RegModel() || PS_Exit();
     PS_StoreChar(2, auto_page_id) || PS_Exit();
-
 
     printf("OK! New fingerprint saved to pageID=%d\n", ++auto_page_id);
   }
