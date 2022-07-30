@@ -6,23 +6,11 @@
 #include <wiringSerial.h>
 #include "../Executive.h"
 
-class Detect_Thread : public Executive {
-    void run(){
-        run_plain();
-    }
-
-};
-
-class Add_Thread : public Executive{
-    void run(){
-        add_withQT();
-    }
-};
 
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    : QMainWindow(parent),
+      ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 }
@@ -41,25 +29,29 @@ void MainWindow::qmessage2()
 {
     QMessageBox::information(this, "Add", "put your finger!");
 }
+
+void MainWindow::detect(){
+    Detect_Thread dtct_thd;
+    dtct_thd.start();
+    dtct_thd.join();
+}
+
+void MainWindow::add(){
+    Add_Thread add_thd;
+    add_thd.start();
+    add_thd.join();
+}
+
 void MainWindow::on_pushButton_clicked()
 {
-    Detect_Thread dtct_thd;
-    emit dtct_thd.start();
-    connect(this, SIGNAL(dtct_thd.start()), this, SLOT(qmessage()),Qt::QueuedConnection);
-
-    //dtct_thd.start();
-    dtct_thd.join();
+    qmessage();
+    detect();
 }
 
 void MainWindow::on_pushButton_2_clicked()
 {
-    Add_Thread add_thd;
-    emit add_thd.start();
-    connect(this, SIGNAL(dtct_thd.start()), this, SLOT(qmessage2()),Qt::QueuedConnection);
-
-
-    //add_thd.start();
-    add_thd.join();
+    qmessage2();
+    add();
 }
 
 

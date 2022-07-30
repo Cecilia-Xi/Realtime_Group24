@@ -27,20 +27,14 @@ void Executive::EXE_run() {
 }
 
 void Executive::search_withQT() {
-  delay(30);
-  if(!digitalRead(g_fp.PS_DetectFinger())){
-      g_fp.search();
-  }
-  else{
-    printf("NO FINGER ON SENSOR");
-  }
+    g_fp.search();
 }
 
 void Executive::add_withQT() {
-  g_fp.add();
+    g_fp.add();
 }
 
-void Executive::run_plain() {
+/*void Executive::run_plain() {
 	while(1){
     delay(100);
     if(digitalRead(g_fp.PS_DetectFinger())){
@@ -51,6 +45,7 @@ void Executive::run_plain() {
     }
   }
 }
+*/
 
 void Executive::initialize() {
   if (!readConfig())
