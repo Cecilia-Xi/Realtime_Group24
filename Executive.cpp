@@ -2,25 +2,26 @@
 
 
 Executive::Executive(){
-  g_fp = new FingerPrint(this);
-	}
+    g_fp = new FingerPrint(this);
+    initialize();
+    g_fp->setUp(g_config.address, g_config.password);
+
+    if (-1 == wiringPiSetup()) {
+    printf("wiringPi setup failed!\n");
+    exit(0);
+    }
+
+    pinMode(key_pin,OUTPUT);
+}
 	
 Executive::~Executive(){
 	g_fp->atExitFunc();
-  delete g_fp;
+    delete g_fp;
 	}
   
   
 void Executive::EXE_run() {
-  initialize();
-	g_fp->setUp(g_config.address, g_config.password);
 
-  if (-1 == wiringPiSetup()) {
-  printf("wiringPi setup failed!\n");
-  exit(0);
-  }
-
-  pinMode(key_pin,OUTPUT);
   //digitalWrite (key_pin,HIGH);//set it initially as high, is closed
   //finger print sensor is ready now//
   

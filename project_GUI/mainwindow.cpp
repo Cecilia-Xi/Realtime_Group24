@@ -19,7 +19,7 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
-
+/*
 void MainWindow::detect(){
     Detect_Thread dtct_thd;
     dtct_thd.start();
@@ -33,15 +33,19 @@ void MainWindow::add(){
     QMessageBox::information(this, "Add", "put your finger!");
     add_thd.join();
 }
-
+*/
 void MainWindow::on_pushButton_clicked()
 {
-    detect();
+	e1.search_withQT();
+    QMessageBox::information(this, "Detect", "put your finger!");
+    
 }
 
 void MainWindow::on_pushButton_2_clicked()
 {
-    add();
+    e1.add_withQT();
+    QMessageBox::information(this, "Add", "put your finger!");
+   
 }
 
 
