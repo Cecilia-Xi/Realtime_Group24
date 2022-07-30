@@ -1,6 +1,6 @@
 #ifndef FINGER_PRINT_H
 #define FINGER_PRINT_H
-
+#include "QMessageBox"
 #include <cstring>
 #include <cstdio>
 #include <math.h>

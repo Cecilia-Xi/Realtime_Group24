@@ -46,7 +46,7 @@ void FingerPrint::add () {
       }
       else {
         printf("Error: Didn't detect finger!\n");
-        PS_Exit();
+
       }
     }
     else {
