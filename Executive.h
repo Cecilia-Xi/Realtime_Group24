@@ -6,7 +6,7 @@
 #include "sensor_model/finger_print.h"
 #include "configuration/utils/config_struct.h"
 //#include "cppThread/CppThread.h"
-
+//chongzhi
 #define SWITCH 7
 #define key_pin 29
 
