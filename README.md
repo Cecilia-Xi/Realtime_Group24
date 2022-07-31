@@ -1,14 +1,7 @@
-# Realtime_Group24
-
-## Fingerprint unlocking
+# <div align=center> Fingerprint Locker </div>
 
 
-<p align="center">
-    <a href = "https://github.com/xiguo0806/Realtime_Group24/blob/main/figure/fingerlogo.jpeg">
-        <img src="figure/fingerlogo.jpeg" alt="Logo" height="300">
-    </a>
-    <p align="center">Use fingerprint to unlock doors</p>
-</p>
+<div align=center><img width = '250' height ='250' src ="https://user-images.githubusercontent.com/31944208/181933886-f17e06ab-4812-4e36-973f-ed0a9678bc0f.png"/></div>
 
 <p align="center">
     <a href="https://youtu.be/Vcys27fCmiU">Youtube</a>
@@ -28,24 +21,12 @@
         <img src="https://img.shields.io/github/v/release/xiguo0806/Realtime_Group24.svg?color=blue&include_prereleases" alt="build status"></a>
 </p>
 
-- [Realtime_Group24](#realtime_group24)
-  - [Fingerprint unlocking](#fingerprint-unlocking)
-- [About the project](#about-the-project)
-  - [Build environment](#build-environment)
-  - [Target](#target)
-  - [Lab environment](#lab-environment)
-    - [Electronic devices](#electronic-devices)
-    - [Start using](#start-using)
-      - [Install](#install)
-  - [License](#license)
-  - [Author](#author)
-    - [update progress table](#update-progress-table)
-    - [progress description](#progress-description)
+
 
 # About the project
 As smart homes become very popular, using chips to automate the operation of the home has become very useful, so we designed a solution to program a Raspberry Pi with C++, then control an electronically controlled door lock through fingerprint recognition, and finally achieve Smart unlocking function.
 
-## Build environment
+## Installation
 + C++
 + github
 
