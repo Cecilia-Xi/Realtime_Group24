@@ -98,28 +98,3 @@ see license information
 + Shimeng Xi (https://github.com/xiguo0806)
 
 ---
-### update progress table
-From 1.25 to 4.11.
-
-1: Starting from January 25th: Familiarize yourself with the pin-corresponding functions on the Raspberry Pi through examples.
-
-2: From January 31st: use pins to implement functions of various components (fingerprint reader, electric lock); write front-end controls; (set tokens, etc.).
-
-3: Start on March 10: (x) (AS608 is too difficult to write, delaying the progress) Start on March 21: Integration and debugging of the entire framework.
-
-4：Since 28 March, functions in .c files already written in AS608 have been wrapped into classes in C++, and then attempts have been made to make the code more concise and clear using calls between files.
-
-5：The package is progressing slowly, but was successfully completed on 12 April. The current goal is to implement a callback mechanism and multi-threading to achieve the effect of switching between threads for multiple functions.
-
-6：The multi-threaded mechanism was nearing completion, but unfortunately one of the members developed a new crown, causing three members to collapse with high fever and the remaining member to accidentally cut his finger, bringing progress to a serious halt.
-
-7：On 19 April, 2 members returned to form and worked on the refactoring of the code, successfully completing the code using event drivers.
-
-8：On 20 February, we started to comment out various parts of the code to make it simple and easy to understand.
-
-### progress description
-3.21 The current version is just a relatively complete AS608 module, (split string and convert, calculate the checksum of the accepted package, GetImage implementation, GenChar implementation, compare, find, store, read, delete fingerprints, etc.) (Compared to It is much more complicated to imagine.😂) Then there is the start application that uses the pins to control the electric lock motor. Write a JS front-end control script again.
-However, all the above functions are only implemented on the Raspberry Pi and cannot be interacted yet.
-
-3.23 The current components of the updated motor part have been uploaded, so all components have been uploaded, but since all external functions need to be changed into classes to implement the callback mechanism of the entire code, the code needs to be rewritten.
-Since the current AS608 is written in c, many codes are in the form of external functions to guide the control of the process, and the process actually needs to be called in the form of a class, so the task at hand is to rewrite the code
