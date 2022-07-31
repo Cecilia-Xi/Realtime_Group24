@@ -63,7 +63,7 @@ $ ./finger
 
 
 
-## Authors(Contact information is on the [git wiki](https://github.com/xiguo0806/Realtime_Group24/wiki/Authors))
+## Authors(Contact information is on the [Wiki](https://github.com/xiguo0806/Realtime_Group24/wiki/Authors))
 
 + Shaobo Yang 
 
