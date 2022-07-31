@@ -24,7 +24,7 @@
 
 
 # About the project
-Considered the electronic technology expeditious raise in the 20th century, people choosed smart home which becomes a big fashionable trend. Embedding chips and system into home gadget automates the operation freely, easily and remotable. Therefore, we proposed a smart lock and produced this program. The product implemented with Raspberry Pi 4B, and a fingerprint controlled solenoid lock. This program completely coding in C++, including C libraries.
+Considered the electronic technology expeditious raise in the 20th century, people choosed smart home which becomes a big fashionable trend. Embedding chips and system into home gadget automates the operation freely, easily and remotable. Therefore, we proposed a smart lock and produced it. The product implemented with Raspberry Pi 4B, and a fingerprint controlled solenoid lock. This program completely coding in C++, including C libraries.
 
 ## Installation
 ### Hardware
