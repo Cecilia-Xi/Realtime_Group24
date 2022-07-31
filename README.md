@@ -42,31 +42,28 @@ WiringPi
 * Then go to the wiringpi folder`./build`
 * If no permission please type `sudo chmod 777 build` in your terminal and than `./build`
 
+
 QT5
 * `sudo apt-get install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools`
 
 QT Creator(optional)
-* `sudo apt-get install qtcreator`
+* `sudo apt-get install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qtcreator`
 ### Run the software
-#### run in QT5
+* If you have qtcreator just open the .pro file to build and run.
+* Compile and run in the terminal.
 ```
 $ qmake ~/poject_GUI/finger.pro -o ~/tmp_path/
 $ make --directory=~/tmp_path/
 $ cd tmp_path
 $ ./finger
 ```
-#### run in QT Creator
-```
-If you have qtcreator open the .pro file in the project to build and run.
-Compile and run in the terminal.
-
-```
 
 
 
 
 
-## Author(Contact information is on the [git wiki](https://github.com/xiguo0806/Realtime_Group24/wiki/Authors))
+
+## Authors(Contact information is on the [git wiki](https://github.com/xiguo0806/Realtime_Group24/wiki/Authors))
 
 + Shaobo Yang 
 
