@@ -46,7 +46,7 @@ QT5
 * `sudo apt-get install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools`
 
 QT Creator(optional)
-* 'sudo apt-get install qtcreator'
+* `sudo apt-get install qtcreator`
 ### Run the software
 #### run in QT5
 ```
