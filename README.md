@@ -27,55 +27,48 @@
 As smart homes become very popular, using chips to automate the operation of the home has become very useful, so we designed a solution to program a Raspberry Pi with C++, then control an electronically controlled door lock through fingerprint recognition, and finally achieve Smart unlocking function.
 
 ## Installation
-+ C++
-+ github
-
-## Target
-On the basis of the original AS608 writing framework, a new AS608 framework that can be fingerprinted and recognized is rewritten in the form of package receipt and package delivery, and then the recognized function is returned on the Raspberry Pi to execute the function of the control switch door lock.
-
-## Lab environment
-### Electronic devices
-+ Raspberry Pi
-+ AS608 
-+ electric lock
-+ relay
+### Hardware
+                
+* Raspberry Pi 4
+* AS608 Fingerprint sensor
+* Relay
+* Breadboard
+* Solenoid lock
 
 
+### Software dependent environment
+WiringPi
+* `git clone https://github.com/WiringPi/WiringPi.git`
+* Then go to the wiringpi folder`./build`
+* If no permission please type `sudo chmod 777 build` in your terminal and than `./build`
 
-### Start using
-Installation Environment Requirements
-+ WiringPi
+QT5
+* `sudo apt-get install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qtcreator`
 
-#### Install
-+ Decompress WiringPi. h
+QT Creator(optional)
 
-```unzip WiringPi.zip```
+### Run the software
+* If you have qtcreator open the .pro file in the project to build and run.
+* Compile and run in the terminal.
+```
+$ qmake ~/poject_GUI/finger.pro -o ~/tmp_path/
+$ make --directory=~/tmp_path/
+$ cd tmp_path
+$ ./finger
+```
 
-+ Installing WiringPi. h
 
-```cd WiringPi```
 
-```./build```
-+ Go to the demo for running the test file
 
-```cd demo```
 
-+ Compile and run
-```make```
+## Author(Contact information is on the [git wiki](https://github.com/xiguo0806/Realtime_Group24/wiki/Authors))
 
-```./fp```
-+ Upon entry it will run to recognise the fingerprint to unlock the door, based on the existing fingerprint library.
-+ The external button in the settings allows you to pause the fingerprint recognition and go to the thread where the new fingerprint was recorded, and after successful recording, the fingerprint recognition is reawakened and the fingerprint detection continues.
-## License
-see license information
++ Shaobo Yang 
 
-## Author
-+ Xinyu Ren (https://github.com/Qizui)
++ Chongzhi Gao 
 
-+ Shaobo Yang (https://github.com/vincent972123)
++ Xinyu Ren 
 
-+ Chongzhi Gao (https://github.com/c712g285)
-
-+ Shimeng Xi (https://github.com/xiguo0806)
++ Shimeng Xi
 
 ---
