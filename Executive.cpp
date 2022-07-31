@@ -1,7 +1,7 @@
 #include "Executive.h"
 
 
-Executive::Executive(){
+Executive::Executive(QObject *parent): QObject(parent){
     g_fp = new FingerPrint(this);
     initialize();
     g_fp->setUp(g_config.address, g_config.password);
