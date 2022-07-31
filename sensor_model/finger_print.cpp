@@ -59,7 +59,6 @@ void FingerPrint::add () {
 
     int score = 0;
     if (PS_Match(&score)) {
-      printf("Matched! score=%d\n", score);
       m_CallBack->checkADD(auto_page_id, score) ;
     }
     else {
@@ -143,6 +142,14 @@ bool FingerPrint::PS_Search(uchar bufferID, int startPageID, int count, int* pPa
         );
 }
 
+bool FingerPrint::PS_Empty() {
+  int size = GenOrder(0x0d, "");
+  SendOrder(g_order, size);
+
+  // receive data, verify the confirmation code and the sum
+  return (RecvReply(g_reply, 12) && Check(g_reply, 12));
+}
+
 bool FingerPrint::PS_GetImage() {
   int size = GenOrder(0x01, "");
 
@@ -191,9 +198,6 @@ bool FingerPrint::PS_StoreChar(uchar bufferID, int pageID) {
         Check(g_reply, 12));
 }
 
-bool FingerPrint::PS_DetectFinger() {
-  return digitalRead(g_as608.detect_pin) == HIGH;
-}
 
 
 // Block until a finger is detected, the longest block wait_time is milliseconds
@@ -227,12 +231,17 @@ bool FingerPrint::waitUntilNotDetectFinger(int wait_time) {
   }
 }
 
-bool FingerPrint::PS_Empty() {
-  int size = GenOrder(0x0d, "");
-  SendOrder(g_order, size);
+bool FingerPrint::PS_DetectFinger() {
+  return digitalRead(g_as608.detect_pin) == HIGH;
+}
 
-  // receive data, verify the confirmation code and the sum 
-  return (RecvReply(g_reply, 12) && Check(g_reply, 12));
+
+
+void FingerPrint::atExitFunc() {
+  if (g_verbose == 1)
+    printf("Exit\n");
+  if (g_fd > 0)
+    serialClose(g_fd);
 }
 
 //The program exited because the function in as608.h failed to execute
@@ -240,12 +249,6 @@ bool FingerPrint::PS_Exit()
 {
   printf("ERROR! code=%02X, desc=%s\n", g_error_code,  PS_GetErrorDesc());
   return true;
-}
-void FingerPrint::atExitFunc() {
-  if (g_verbose == 1)
-    printf("Exit\n");
-  if (g_fd > 0)
-    serialClose(g_fd); 
 }
 
 // obtain the defination of error code of g_error_code and assign value to g_error_desc

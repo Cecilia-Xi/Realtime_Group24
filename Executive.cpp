@@ -1,25 +1,57 @@
 #include "Executive.h"
 
 
+void Executive::checkADD(int finger, int score) const{
+  cout << "Callback print: The new  finger  No." << finger << " is added, Matched score: " << score << endl;
+}
+
+void Executive::checkSEARCH(int finger) const{
+   cout << "Callback print: The finger in the Library is No." << finger << endl;
+}
+
 Executive::Executive(QObject *parent): QObject(parent){
     g_fp = new FingerPrint(this);
     initialize();
-    g_fp->setUp(g_config.address, g_config.password);
-
     if (-1 == wiringPiSetup()) {
-    printf("wiringPi setup failed!\n");
+        printf("wiringPi setup failed!\n");
     exit(0);
     }
-
-    pinMode(key_pin,OUTPUT);
 }
-	
+
+void Executive::initialize() {
+  if (!readConfig())
+    exit(1);
+  if (g_fp->g_verbose == 1)
+    printConfig();
+  if (-1 == wiringPiSetup()) {
+    printf("wiringPi setup failed!\n");
+    exit(0);
+  }
+  pinMode(g_config.detect_pin, INPUT);
+  pinMode(g_fp->g_as608.detect_pin, INPUT);
+  pinMode(key_pin,OUTPUT);
+  if((g_fp->g_fd = serialOpen(g_config.serial, g_config.baudrate)) < 0)	{
+    fprintf(stderr,"Unable to open serial device: %s\n", strerror(errno));
+    exit(0);
+  }
+  g_fp->setUp(g_config.address, g_config.password);
+
+}
+
 Executive::~Executive(){
 	g_fp->atExitFunc();
     delete g_fp;
 	}
-  
-  
+
+void Executive::lockerControl(int second) {
+  printf("FBI open The Door!\n");
+  digitalWrite (key_pin,LOW);//set it initially as high, is closed
+  //delay for locker open with customized seconds
+  delay(second*1000);
+  digitalWrite (key_pin,HIGH);
+}
+
+/*
 void Executive::EXE_run() {
 
   //digitalWrite (key_pin,HIGH);//set it initially as high, is closed
@@ -29,78 +61,45 @@ void Executive::EXE_run() {
   run_plain();
   
 }
+*/
+
+/*
+void Executive::run_plain() {
+    while(1){
+        delay(100);
+        if(!digitalRead(g_fp->PS_DetectFinger())){
+            printf("now pressed, pin value is :%d\n",digitalRead(g_fp->PS_DetectFinger()));
+            if(g_fp->search()){
+              printf("FBI open The Door!\n");
+              digitalWrite (key_pin,LOW);//set it initially as high, is closed
+
+              delay(1000);
+              digitalWrite (key_pin,HIGH);
+
+              //pinMode(g_fp->g_as608.detect_pin, INPUT);
+            }
+
+        }
+        else{
+          printf("NOT PRESS!!, pin value is :%d\n",digitalRead(g_fp->PS_DetectFinger()));
+        }
+  }
+}
+*/
 
 void Executive::search_withQT() {
-    //printf("1");
-    g_fp->search();
+    while(1){
+        delay(100);
+        if(!digitalRead(g_fp->PS_DetectFinger())){
+            if(g_fp->search()){
+              lockerControl(1);
+            }
+        }
+    }
 }
 
 void Executive::add_withQT() {
     g_fp->add();
-}
-
-void Executive::run_plain() {
-	while(1){
-    delay(100);
-    if(!digitalRead(g_fp->PS_DetectFinger())){
-        printf("now pressed, pin value is :%d\n",digitalRead(g_fp->PS_DetectFinger()));
-        if(g_fp->search()){
-          printf("FBI open The Door!\n");
-          digitalWrite (key_pin,LOW);//set it initially as high, is closed
-
-          delay(1000);
-          digitalWrite (key_pin,HIGH);
-
-          //pinMode(g_fp->g_as608.detect_pin, INPUT);
-        }
-        
-    }
-    else{
-      printf("NOT PRESS!!, pin value is :%d\n",digitalRead(g_fp->PS_DetectFinger()));
-    }
-  }
-}
-
-
-void Executive::initialize() {
-  if (!readConfig())
-    exit(1);
-
-  if (g_fp->g_verbose == 1)
-    printConfig();
-
-  if (-1 == wiringPiSetup()) {
-    printf("wiringPi setup failed!\n");
-    exit(0);
-  }
-
-  pinMode(g_config.detect_pin, INPUT);
-
-  if((g_fp->g_fd = serialOpen(g_config.serial, g_config.baudrate)) < 0)	{
-    fprintf(stderr,"Unable to open serial device: %s\n", strerror(errno));
-    exit(0);
-  }
-
-  
-}
-
-void Executive::checkADD(int finger, int score) const{
-  cout << "The new  finger  No." << finger << " is added, Matched score: " << score << endl;
-}
-
-void Executive::checkSEARCH(int finger) const{
-   cout << "The finger in the Library is No." << finger << endl;
-}
-  
-void Executive::lockerControl() {
-  pinMode (key_pin,OUTPUT);
-  printf("FBI open The Door!\n");
-  digitalWrite (key_pin,LOW);//set it initially as high, is closed
-
-  delay(1000);
-  digitalWrite (key_pin,LOW);
-
-  pinMode(g_fp->g_as608.detect_pin, INPUT);
 }
 
 
@@ -114,12 +113,9 @@ void Executive::asyncConfig() {
 
 bool Executive::readConfig() {
   FILE* fp;
-
-  
   char filename[256] = { 0 };
   sprintf(filename, "%s/.fpconfig", getenv("HOME"));
-  
-  
+
   if (access(filename, F_OK) == 0) { 
     trimSpaceInFile(filename);
     fp = fopen(filename, "r");
@@ -132,9 +128,7 @@ bool Executive::readConfig() {
     g_config.baudrate = 9600;
     g_config.detect_pin = 1; 
     strcpy(g_config.serial, "/dev/ttyAMA0");
-
     writeConfig();
-
     printf("Please config the address and password in \"~/.fpconfig\"\n");
     printf("  fp cfgaddr   0x[address]\n");
     printf("  fp cfgpwd    0x[password]\n");

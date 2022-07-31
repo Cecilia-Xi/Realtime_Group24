@@ -7,13 +7,11 @@
 #include <errno.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include <unistd.h>
 #include <cstring>
 #include <stdarg.h>
 
 #include <wiringPi.h>
 #include <wiringSerial.h>
-
 
 #include "type_struct.h"
 
@@ -25,16 +23,26 @@ class Lib {
   
 public:
 
-  FP_sensor g_as608;
+  FP_sensor g_as608;//fingerprint sensor struct variale, wait to config with sensor data
 
-  int   g_fd;          // 文件描述符，即open()函数打开串口的返回值
-  int   g_verbose;     // 输出信息的详细程度
-  char  g_error_desc[128]; // 错误代码的含义
-  uchar g_error_code;      // 模块返回的确认码，如果函数返回值不为true，读取此变量
-  uchar g_order[64] = { 0 }; // 发送给模块的指令包
+  int   g_fd;          // folder describe character , the return value of wiringPI serial
+  int   g_verbose;     // the oputput detail level
+  char  g_error_desc[128]; // error code dedcription
+  uchar g_error_code;      // sensor error code，if any funciton retule false, then get this value
+  uchar g_order[64] = { 0 }; // the order package send to sensor
 
+  /*
+  * intro: constructor
+  * param: num, buffer, width
+  * return: none
+  */
   Lib(){};
-  
+
+  /*
+  * intro: destructor
+  * param: none
+  * return: none
+  */
   ~Lib(){};
  
   /*
@@ -44,7 +52,6 @@ public:
   * param: num, buffer, width
   * return: none
   */
-
   void Split(uint num, uchar* buf, int count);
 
   /*
@@ -63,7 +70,6 @@ public:
   * param: buffer, width
   * return: sum of buffer
   */
-
   int Calibrate(const uchar* buf, int size);
     
   /*
@@ -114,26 +120,15 @@ public:
   */
   bool RecvPacket(uchar* pData, int validDataSize);
 
-
   /*
-   * 辅助函数
-   * 构造指令包，结果赋值给全局变量 g_order
-   * 参数：
-   *   orderCode, 指令代码， 如0x01, 0x02, 0x1a...
-   *   fmt, 参数描述，例如指令包带有2个参数，一个uchar类型，占1个字节，另一个uchar类型，占2个字节
-   *          那么fmt应为"%1d%2d"。
-   *      如果参数为一个uchar类型，占1个字节，另一个为uchar*类型，占32个字节
-   *          那么fmt应为"%d%32s"
-   *      (数字代表该参数占的字节数，为1则可忽略，字母代表类型, 只支持%d、%u 和 %s)
+  * inheri: father
+  * intro: used to build order package
+  * param: orderCode, fmt(a dynamic changed amount of variables )
+  * return: set value to g_order
   */
   int GenOrder(uchar orderCode, const char* fmt, ...);
 
-
-
-
 private:
-
-
 
   /*
   * delay: 0s
@@ -143,6 +138,7 @@ private:
   * return: none
   */
   void PrintProcess(int done, int all);
+
   /*
   * delay: 0s
   * inheri: father

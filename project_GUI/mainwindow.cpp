@@ -13,7 +13,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
 void MainWindow::on_pushButton_clicked()
 {
     qDebug()<<"click start and main-thread id"<<QThread::currentThreadId();
@@ -26,7 +25,7 @@ void MainWindow::on_pushButton_clicked()
 
     emit signalStart();
 }
-
+/*
 void MainWindow::on_pushButton_2_clicked()
 {
     qDebug()<<"click start and main-thread id"<<QThread::currentThreadId();
@@ -39,4 +38,13 @@ void MainWindow::on_pushButton_2_clicked()
 
     emit signalStart();
 }
-
+*/
+void MainWindow::on_pushButton_2_clicked()
+{
+   // qDebug()<<"click stop and the thread stop"<<QDateTime::currentDateTime();
+    thread->quit();
+    thread->wait();
+    qDebug()<<"release thread";
+    delete thread;
+    thread = NULL;
+}
