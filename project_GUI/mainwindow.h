@@ -63,15 +63,15 @@ signals:
     * param: none
     * return: none
     */
-    void signalStart();
-    void signalStart2();
+    void detect_signalStart();
+    void add_signalStart();
 
 private:
     Ui::MainWindow *ui;//MainWindow pointer
-    QThread *thread1;//QThread pointer
-    QThread *thread2;//QThread pointer
+    QThread *detect_thread;//QThread pointer
+    QThread *add_thread;//QThread pointer
     Executive *e1;//Executive pointer
-    Executive *e2;//Executive pointer
+
 };
 
 #endif // MAINWINDOW_H

@@ -6,80 +6,54 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     e1 = new Executive;
-    e2 = new Executive;
     ui->setupUi(this);
 }
 
 MainWindow::~MainWindow() {
 
-
-    qDebug()<<"release thread";
-
-    ui = nullptr;
     delete ui;
-    e1 = nullptr;
-    e2 = nullptr;
-    delete e1;
-    delete e2;
-
-    thread1 = nullptr;
-    thread2 =nullptr;
-    delete thread2;
-    delete thread1;
-
 
 }
 
 void MainWindow::on_pushButton_clicked() {
     qDebug()<<"click start and main-thread id"<<QThread::currentThreadId();
-    thread1 = new QThread;
-    e1->moveToThread(thread1);
-    connect(this,&MainWindow::signalStart,e1,&Executive::search_withQT);
-    connect(thread1,&QThread::finished,e1,&QObject::deleteLater);
-    emit signalStart();
-    thread1->start();
+    detect_thread = new QThread;
+    e1->moveToThread(detect_thread);
+    connect(this,&MainWindow::detect_signalStart,e1,&Executive::search_withQT);
+    connect(detect_thread,&QThread::finished,e1,&QObject::deleteLater);
 
+    detect_thread->start();
+    emit detect_signalStart();
 }
 
 void MainWindow::on_pushButton_2_clicked() {
     qDebug()<<"click start and main-thread id"<<QThread::currentThreadId();
-    thread2 = new QThread;
-    e1->moveToThread(thread2);
-    connect(this,&MainWindow::signalStart2,e1,&Executive::add_withQT);
-    connect(thread2,&QThread::finished,e1,&QObject::deleteLater);
-    emit signalStart2();
-    thread2->start();
+    add_thread = new QThread;
+    e1->moveToThread(add_thread);
+    connect(this,&MainWindow::add_signalStart,e1,&Executive::add_withQT);
+    connect(add_thread,&QThread::finished,e1,&QObject::deleteLater);
+    emit add_signalStart();
+    add_thread->start();
 
 }
 
 void MainWindow::on_pushButton_3_clicked() {
-    qDebug()<<"3"<<QThread::currentThreadId();
-    thread1->quit();
-//    qDebug()<<"release thread1";
-//    thread2 = new QThread;
-//    thread1->moveToThread(thread2);
-//    //e1->moveToThread(thread2);
-//    connect(this,&MainWindow::signalStart2,e1,&Executive::add_withQT);
-//    connect(thread2,&QThread::finished,e1,&QObject::deleteLater);
 
-//    emit signalStart2();
-//    thread2->start();
-
+    qDebug()<<"click stop and the detect stop";
+    detect_thread->quit();
+    detect_thread->wait();
+    qDebug()<<"release detect_thread";
+    delete detect_thread;
+    detect_thread = NULL;
 }
 
 void MainWindow::on_pushButton_4_clicked() {
-    qDebug()<<"4"<<QThread::currentThreadId();
-    thread2->quit();
-//    qDebug()<<"release thread1";
-//    thread1 = new QThread;
-//    //e1->moveToThread(thread2);
-//    thread2->moveToThread(thread1);
-//    connect(this,&MainWindow::signalStart,e1,&Executive::add_withQT);
-//    connect(thread1,&QThread::finished,e1,&QObject::deleteLater);
-
-//    emit signalStart();
-//    thread2->start();
-
+    qDebug()<<"click stop and the add_thread stop";
+    add_thread->quit();
+    add_thread->wait();
+    qDebug()<<"release add_thread";
+    delete add_thread;
+    add_thread = NULL;
 }
 
 
