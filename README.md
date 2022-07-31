@@ -43,18 +43,23 @@ WiringPi
 * If no permission please type `sudo chmod 777 build` in your terminal and than `./build`
 
 QT5
-* `sudo apt-get install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qtcreator`
+* `sudo apt-get install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools`
 
 QT Creator(optional)
-
+* 'sudo apt-get install qtcreator'
 ### Run the software
-* If you have qtcreator open the .pro file in the project to build and run.
-* Compile and run in the terminal.
+#### run in QT5
 ```
 $ qmake ~/poject_GUI/finger.pro -o ~/tmp_path/
 $ make --directory=~/tmp_path/
 $ cd tmp_path
 $ ./finger
+```
+#### run in QT Creator
+```
+* If you have qtcreator open the .pro file in the project to build and run.
+* Compile and run in the terminal.
+
 ```
 
 
