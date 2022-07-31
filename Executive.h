@@ -5,6 +5,7 @@
 #include <QObject>
 #include "sensor_model/finger_print.h"
 #include "configuration/utils/config_struct.h"
+#include <QDebug>
 //#include "cppThread/CppThread.h"
 
 #define SWITCH 7

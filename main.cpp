@@ -1,15 +1,12 @@
-#include "Executive.h"
-#include <iostream>
-
-
+#include "mainwindow.h"
+#include "../Executive.h"
+#include <QApplication>
+#include <QApplication>
 int main(int argc, char *argv[])
-{	
-	Executive exe1;
-	exe1.EXE_run();
-	/*
-	Executive exe_th;
-	exe_th.start();
-	exe_th.join();
-	*/
-	return 0;
+{
+    QApplication a(argc, argv);
+    
+    MainWindow w;
+    w.show();
+    return a.exec();
 }

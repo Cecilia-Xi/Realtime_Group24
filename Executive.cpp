@@ -52,43 +52,9 @@ void Executive::lockerControl(int second) const {
   digitalWrite (key_pin,HIGH);
 }
 
-/*
-void Executive::EXE_run() {
-
-  //digitalWrite (key_pin,HIGH);//set it initially as high, is closed
-  //finger print sensor is ready now//
-  
-  //run_withQT();
-  run_plain();
-  
-}
-*/
-
-/*
-void Executive::run_plain() {
-    while(1){
-        delay(100);
-        if(!digitalRead(m_fingerprint->PS_DetectFinger())){
-            qDebug("now pressed, pin value is :%d\n",digitalRead(m_fingerprint->PS_DetectFinger()));
-            if(m_fingerprint->search()){
-              qDebug("FBI open The Door!\n");
-              digitalWrite (key_pin,LOW);//set it initially as high, is closed
-
-              delay(1000);
-              digitalWrite (key_pin,HIGH);
-
-              //pinMode(m_fingerprint->g_as608.detect_pin, INPUT);
-            }
-
-        }
-        else{
-          qDebug("NOT PRESS!!, pin value is :%d\n",digitalRead(m_fingerprint->PS_DetectFinger()));
-        }
-  }
-}
-*/
 
 void Executive::search_withQT() {
+    qDebug()<<"detect_thread id"<<QThread::currentThreadId();
     while(1){
         delay(100);
         if(!m_fingerprint->PS_DetectFinger()){
@@ -101,6 +67,7 @@ void Executive::search_withQT() {
 }
 
 void Executive::add_withQT() {
+    qDebug()<<"add_thread id"<<QThread::currentThreadId();
     m_fingerprint->add();
 
 }
