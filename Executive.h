@@ -1,12 +1,12 @@
 #ifndef EXECUTIVE_H
 #define EXECUTIVE_H
-
+#include <QApplication>
 #include <QThread>
 #include <QObject>
 #include "sensor_model/finger_print.h"
 #include "configuration/utils/config_struct.h"
 //#include "cppThread/CppThread.h"
-//chongzhi
+
 #define SWITCH 7
 #define key_pin 29
 
@@ -64,7 +64,7 @@ public:
     * param: second
     * return: none
     */
-    void lockerControl(int second);
+    void lockerControl(int second) const;
 
     /*
      * public member function
@@ -85,7 +85,7 @@ public:
 public slots:
     /*
      * public member slot function
-    * intro: run g_fp->search() in QTread, unlock the locker when g_fp->search() return true
+    * intro: run m_fingerprint->search() in QTread, unlock the locker when m_fingerprint->search() return true
     * param: none
     * return: none
     */
@@ -93,15 +93,15 @@ public slots:
 
     /*
      * public member slot function
-    * intro: run g_fp->add() in QTread
+    * intro: run m_fingerprint->add() in QTread
     * param: none
     * return: none
     */
     void add_withQT();
 
 private:
-    Config g_config;//Configuration struct varible,used to set g_fp->g_as608
-    FingerPrint *g_fp;//Fingerprint pointer
+    Config g_config;//Configuration struct varible,used to set m_fingerprint->g_as608
+    FingerPrint *m_fingerprint;//Fingerprint pointer
 
     /*
      * private member helper function

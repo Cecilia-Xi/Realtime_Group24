@@ -48,6 +48,14 @@ public slots:
     */
     void on_pushButton_2_clicked();
 
+    /*
+     * public member slots function
+    * intro:once clicked the button, then goto add thread
+    * param: none
+    * return: none
+    */
+    void on_pushButton_3_clicked();
+    void on_pushButton_4_clicked();
 signals:
     /*
      * signal function
@@ -56,11 +64,14 @@ signals:
     * return: none
     */
     void signalStart();
+    void signalStart2();
 
 private:
     Ui::MainWindow *ui;//MainWindow pointer
-    QThread *thread;//QThread pointer
+    QThread *thread1;//QThread pointer
+    QThread *thread2;//QThread pointer
     Executive *e1;//Executive pointer
+    Executive *e2;//Executive pointer
 };
 
 #endif // MAINWINDOW_H

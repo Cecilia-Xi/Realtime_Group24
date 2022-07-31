@@ -7,13 +7,14 @@ void Executive::checkADD(int finger, int score) const{
 
 void Executive::checkSEARCH(int finger) const{
    cout << "Callback print: The finger in the Library is No." << finger << endl;
+   lockerControl(1);
 }
 
 Executive::Executive(QObject *parent): QObject(parent){
-    g_fp = new FingerPrint(this);
+    m_fingerprint = new FingerPrint(this);
     initialize();
     if (-1 == wiringPiSetup()) {
-        printf("wiringPi setup failed!\n");
+        qDebug("wiringPi setup failed!\n");
     exit(0);
     }
 }
@@ -21,30 +22,30 @@ Executive::Executive(QObject *parent): QObject(parent){
 void Executive::initialize() {
   if (!readConfig())
     exit(1);
-  if (g_fp->g_verbose == 1)
+  if (m_fingerprint->g_verbose == 1)
     printConfig();
   if (-1 == wiringPiSetup()) {
-    printf("wiringPi setup failed!\n");
+    qDebug("wiringPi setup failed!\n");
     exit(0);
   }
   pinMode(g_config.detect_pin, INPUT);
-  pinMode(g_fp->g_as608.detect_pin, INPUT);
+  pinMode(m_fingerprint->g_as608.detect_pin, INPUT);
   pinMode(key_pin,OUTPUT);
-  if((g_fp->g_fd = serialOpen(g_config.serial, g_config.baudrate)) < 0)	{
+  if((m_fingerprint->g_fd = serialOpen(g_config.serial, g_config.baudrate)) < 0)	{
     fprintf(stderr,"Unable to open serial device: %s\n", strerror(errno));
     exit(0);
   }
-  g_fp->setUp(g_config.address, g_config.password);
+  m_fingerprint->setUp(g_config.address, g_config.password);
 
 }
 
 Executive::~Executive(){
-	g_fp->atExitFunc();
-    delete g_fp;
+	m_fingerprint->atExitFunc();
+    delete m_fingerprint;
 	}
 
-void Executive::lockerControl(int second) {
-  printf("FBI open The Door!\n");
+void Executive::lockerControl(int second) const {
+  qDebug("FBI open The Door!\n");
   digitalWrite (key_pin,LOW);//set it initially as high, is closed
   //delay for locker open with customized seconds
   delay(second*1000);
@@ -67,21 +68,21 @@ void Executive::EXE_run() {
 void Executive::run_plain() {
     while(1){
         delay(100);
-        if(!digitalRead(g_fp->PS_DetectFinger())){
-            printf("now pressed, pin value is :%d\n",digitalRead(g_fp->PS_DetectFinger()));
-            if(g_fp->search()){
-              printf("FBI open The Door!\n");
+        if(!digitalRead(m_fingerprint->PS_DetectFinger())){
+            qDebug("now pressed, pin value is :%d\n",digitalRead(m_fingerprint->PS_DetectFinger()));
+            if(m_fingerprint->search()){
+              qDebug("FBI open The Door!\n");
               digitalWrite (key_pin,LOW);//set it initially as high, is closed
 
               delay(1000);
               digitalWrite (key_pin,HIGH);
 
-              //pinMode(g_fp->g_as608.detect_pin, INPUT);
+              //pinMode(m_fingerprint->g_as608.detect_pin, INPUT);
             }
 
         }
         else{
-          printf("NOT PRESS!!, pin value is :%d\n",digitalRead(g_fp->PS_DetectFinger()));
+          qDebug("NOT PRESS!!, pin value is :%d\n",digitalRead(m_fingerprint->PS_DetectFinger()));
         }
   }
 }
@@ -90,25 +91,27 @@ void Executive::run_plain() {
 void Executive::search_withQT() {
     while(1){
         delay(100);
-        if(!digitalRead(g_fp->PS_DetectFinger())){
-            if(g_fp->search()){
-              lockerControl(1);
+        if(!m_fingerprint->PS_DetectFinger()){
+            if(m_fingerprint->search()){
+              qDebug("detected");
             }
         }
+
     }
 }
 
 void Executive::add_withQT() {
-    g_fp->add();
+    m_fingerprint->add();
+
 }
 
 
 void Executive::asyncConfig() {
-  g_fp->g_as608.detect_pin   = g_config.detect_pin;
-  g_fp->g_as608.has_password = g_config.has_password;
-  g_fp->g_as608.password     = g_config.password;
-  g_fp->g_as608.chip_addr    = g_config.address;
-  g_fp->g_as608.baud_rate    = g_config.baudrate;
+  m_fingerprint->g_as608.detect_pin   = g_config.detect_pin;
+  m_fingerprint->g_as608.has_password = g_config.has_password;
+  m_fingerprint->g_as608.password     = g_config.password;
+  m_fingerprint->g_as608.chip_addr    = g_config.address;
+  m_fingerprint->g_as608.baud_rate    = g_config.baudrate;
 }
 
 bool Executive::readConfig() {
@@ -129,12 +132,12 @@ bool Executive::readConfig() {
     g_config.detect_pin = 1; 
     strcpy(g_config.serial, "/dev/ttyAMA0");
     writeConfig();
-    printf("Please config the address and password in \"~/.fpconfig\"\n");
-    printf("  fp cfgaddr   0x[address]\n");
-    printf("  fp cfgpwd    0x[password]\n");
-    printf("  fp cfgserial [serialFile]\n");
-    printf("  fp cfgbaud   [rate]\n");
-    printf("  fp cfgpin    [GPIO_pin]\n");
+    qDebug("Please config the address and password in \"~/.fpconfig\"\n");
+    qDebug("  fp cfgaddr   0x[address]\n");
+    qDebug("  fp cfgpwd    0x[password]\n");
+    qDebug("  fp cfgserial [serialFile]\n");
+    qDebug("  fp cfgbaud   [rate]\n");
+    qDebug("  fp cfgpin    [GPIO_pin]\n");
     return false;
   }
 
@@ -187,7 +190,7 @@ bool Executive::readConfig() {
       g_config.detect_pin = toInt(value);
     }
     else {
-      printf("Unknown key:%s\n", key);
+      qDebug("Unknown key:%s\n", key);
       fclose(fp);
       return false;
     }
@@ -201,14 +204,14 @@ bool Executive::readConfig() {
 }
 
 void Executive::printConfig() {
-  printf("address=%08x\n", g_config.address);
+  qDebug("address=%08x\n", g_config.address);
   if (g_config.has_password)
-    printf("password=%08x\n", g_config.password);
+    qDebug("password=%08x\n", g_config.password);
   else
-    printf("password=none(no password)\n");
-  printf("serial_file=%s\n",   g_config.serial);
-  printf("baudrate=%d\n",   g_config.baudrate);
-  printf("detect_pin=%d\n",   g_config.detect_pin);
+    qDebug("password=none(no password)\n");
+  qDebug("serial_file=%s\n",   g_config.serial);
+  qDebug("baudrate=%d\n",   g_config.baudrate);
+  qDebug("detect_pin=%d\n",   g_config.detect_pin);
 }
 
 
@@ -219,7 +222,7 @@ void Executive::writeConfig() {
   
   FILE* fp  = fopen(filename, "w+");
   if (!fp) {
-    printf("Write config file error!\n");
+    qDebug("Write config file error!\n");
     exit(0);
   }
 
