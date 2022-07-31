@@ -57,8 +57,8 @@ $ ./finger
 ```
 #### run in QT Creator
 ```
-* If you have qtcreator open the .pro file in the project to build and run.
-* Compile and run in the terminal.
+If you have qtcreator open the .pro file in the project to build and run.
+Compile and run in the terminal.
 
 ```
 
