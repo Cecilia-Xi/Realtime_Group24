@@ -23,7 +23,7 @@ HEADERS += \
     ../sensor_model/finger_print.h\
     ../sensor_model/lib/lib.h\
     ../configuration/utils/utils.h\
-    ../cppThread/cppThread.h
+    cppThread.h
 
 FORMS += \
     mainwindow.ui
