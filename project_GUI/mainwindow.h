@@ -62,7 +62,7 @@ signals:
     void add_signalStart();
 
 private:
-    Executive e1;
+    Executive m_exec;
     Ui::MainWindow *ui;//MainWindow pointer
 
 
