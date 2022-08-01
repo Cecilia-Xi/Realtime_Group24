@@ -3,10 +3,10 @@
 #include <QApplication>
 #include <QThread>
 #include <QObject>
+#include <QDebug>
 #include "sensor_model/finger_print.h"
 #include "configuration/utils/config_struct.h"
-#include <QDebug>
-//#include "cppThread/CppThread.h"
+#include "cppThread/CppThread.h"
 
 #define SWITCH 7
 #define key_pin 29
@@ -14,7 +14,7 @@
 using namespace std;
 
 
-class Executive : public QObject, CallBack{
+class Executive : public CallBack, public CppThread{
 public:
     /* CALLBACK FUNCTION
      * virtual funtion declaration, inherite from CallBack class
@@ -40,7 +40,7 @@ public:
     * param: parent pointer
     * return: true if get error
     */
-    explicit Executive(QObject *parent = nullptr);
+    Executive();
 
     /*
      * public member function
@@ -101,6 +101,9 @@ public slots:
     void add_withQT();
 
 private:
+    void search_CppThread();
+    void add_CppThread();
+
     Config g_config;//Configuration struct varible,used to set m_fingerprint->g_as608
     FingerPrint *m_fingerprint;//Fingerprint pointer
 

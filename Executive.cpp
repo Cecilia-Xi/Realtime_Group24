@@ -10,7 +10,17 @@ void Executive::checkSEARCH(int finger) const{
    lockerControl(1);
 }
 
-Executive::Executive(QObject *parent): QObject(parent){
+void Executive::search_CppThread(){
+    qDebug()<<"detect_thread";
+    m_fingerprint->search();
+}
+
+void Executive::add_CppThread(){
+    qDebug()<<"add_thread ";
+    m_fingerprint->add();
+}
+
+Executive::Executive(){
     m_fingerprint = new FingerPrint(this);
     initialize();
     if (-1 == wiringPiSetup()) {

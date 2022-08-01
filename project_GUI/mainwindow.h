@@ -16,6 +16,9 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow {
 Q_OBJECT
 public:
+    QThread *detect_thread;//QThread pointer
+    QThread *add_thread;//QThread pointer
+    //Executive e1;//Executive pointer
     /*
      * public member function
     * intro: constructor
@@ -48,20 +51,6 @@ public slots:
     */
     void on_pushButton_2_clicked();
 
-    /*
-     * public member slots function
-    * intro:once clicked the button, end the detect thread
-    * param: none
-    * return: none
-    */
-    void on_pushButton_3_clicked();
-    /*
-     * public member slots function
-    * intro:once clicked the button, end the add thread
-    * param: none
-    * return: none
-    */
-    void on_pushButton_4_clicked();
 signals:
     /*
      * signal function
@@ -73,10 +62,9 @@ signals:
     void add_signalStart();
 
 private:
+    Executive e1;
     Ui::MainWindow *ui;//MainWindow pointer
-    QThread *detect_thread;//QThread pointer
-    QThread *add_thread;//QThread pointer
-    Executive *e1;//Executive pointer
+
 
 };
 

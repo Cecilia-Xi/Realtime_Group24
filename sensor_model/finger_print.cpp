@@ -10,11 +10,9 @@ FingerPrint::~FingerPrint(){
 }
 
 void FingerPrint::search(){
-    int a = 0;
     while(1){
         if(!PS_DetectFinger()){
-            a++;
-            qDebug("Please put your finger on the module.\n");
+            qDebug("Please put your finger on the sensor.\n");
             //delay for wait customer put whole finger on
             delay(500);
             PS_GetImage() || PS_Exit();
@@ -26,6 +24,7 @@ void FingerPrint::search(){
                 m_CallBack->checkSEARCH(pageID);
             }
             else {
+                qDebug("You are not in the System! OUT.\n");
                 break;
             }
         }

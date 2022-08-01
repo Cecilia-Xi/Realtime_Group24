@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>561</width>
-    <height>419</height>
+    <height>425</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,20 +30,6 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="pushButton_3">
-      <property name="text">
-       <string>End detect</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="pushButton_4">
-      <property name="text">
-       <string>End add</string>
-      </property>
-     </widget>
-    </item>
-    <item>
      <widget class="QCalendarWidget" name="calendarWidget"/>
     </item>
    </layout>
@@ -54,7 +40,7 @@
      <x>0</x>
      <y>0</y>
      <width>561</width>
-     <height>28</height>
+     <height>30</height>
     </rect>
    </property>
   </widget>
