@@ -32,9 +32,9 @@ void MainWindow::on_pushButton_2_clicked() {
     e1->moveToThread(add_thread);
     connect(this,&MainWindow::add_signalStart,e1,&Executive::add_withQT);
     connect(add_thread,&QThread::finished,e1,&QObject::deleteLater);
-    emit add_signalStart();
-    add_thread->start();
 
+    add_thread->start();
+    emit add_signalStart();
 }
 
 void MainWindow::on_pushButton_3_clicked() {

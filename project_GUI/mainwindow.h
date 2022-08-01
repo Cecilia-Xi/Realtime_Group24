@@ -50,11 +50,17 @@ public slots:
 
     /*
      * public member slots function
-    * intro:once clicked the button, then goto add thread
+    * intro:once clicked the button, end the detect thread
     * param: none
     * return: none
     */
     void on_pushButton_3_clicked();
+    /*
+     * public member slots function
+    * intro:once clicked the button, end the add thread
+    * param: none
+    * return: none
+    */
     void on_pushButton_4_clicked();
 signals:
     /*

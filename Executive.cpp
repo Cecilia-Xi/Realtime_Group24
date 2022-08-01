@@ -2,11 +2,11 @@
 
 
 void Executive::checkADD(int finger, int score) const{
-  cout << "Callback print: The new  finger  No." << finger << " is added, Matched score: " << score << endl;
+  qDebug("Callback ++ADD++ print: The new  finger  No. %d is added, Matched score: %d\n",finger,score);
 }
 
 void Executive::checkSEARCH(int finger) const{
-   cout << "Callback print: The finger in the Library is No." << finger << endl;
+   qDebug("Callback ==SEARCH= print: The finger in the Library is No. %d\n",finger);
    lockerControl(1);
 }
 
@@ -55,15 +55,7 @@ void Executive::lockerControl(int second) const {
 
 void Executive::search_withQT() {
     qDebug()<<"detect_thread id"<<QThread::currentThreadId();
-    while(1){
-        delay(100);
-        if(!m_fingerprint->PS_DetectFinger()){
-            if(m_fingerprint->search()){
-              qDebug("detected");
-            }
-        }
-
-    }
+    m_fingerprint->search();
 }
 
 void Executive::add_withQT() {
@@ -204,6 +196,3 @@ void Executive::writeConfig() {
 
   fclose(fp);
 }
-
-
-//test git 
