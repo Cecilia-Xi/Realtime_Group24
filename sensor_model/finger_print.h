@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cstdio>
 #include <math.h>
+#include <QDebug>
 using namespace std;
 
 #include "lib/lib.h"
@@ -60,7 +61,7 @@ public:
     * param: none
     * return: true if the fingerprint existed, otherwise false
     */
-	bool search();
+    void search();
 
     /*
     * intro:  encapsulation funtion for add a new fingerprint into sensor library
@@ -174,14 +175,6 @@ private:
     * return: true if detect finger
     */
     bool waitUntilDetectFinger(int wait_time);
-
-    /*
-     *  private member function
-    * intro: wait with wait_time second to detect finger is NOT on the sensor
-    * param: wait_time microSecond
-    * return: true if not detect finger
-    */
-	bool waitUntilNotDetectFinger(int wait_time);
 
     /*
      * private member function

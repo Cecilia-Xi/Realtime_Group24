@@ -9,52 +9,45 @@ FingerPrint::~FingerPrint(){
 
 }
 
-bool FingerPrint::search(){
-  printf("Please put your finger on the module.\n");
-  PS_GetImage() || PS_Exit();
-  PS_GenChar(1) || PS_Exit();
+void FingerPrint::search(){
+    int a = 0;
+    while(1){
+        if(!PS_DetectFinger()){
+            a++;
+            qDebug("Please put your finger on the module.\n");
+            //delay for wait customer put whole finger on
+            delay(500);
+            PS_GetImage() || PS_Exit();
+            PS_GenChar(1) || PS_Exit();
+            int pageID = 0, score = 0;
 
-  int pageID = 0, score = 0;
-  if (!PS_Search(1, 0, 300, &pageID, &score))
-    return false;
-  
-  printf("Matched! pageID=%d score=%d\n", pageID, score);
-  m_CallBack->checkSEARCH(pageID);
-  return true;
+            if (PS_Search(1, 0, 300, &pageID, &score)) {
+                //qDebug("Matched! pageID=%d score=%d\n", pageID, score);
+                m_CallBack->checkSEARCH(pageID);
+            }
+            else {
+                break;
+            }
+        }
+
+    }
 }
-  
 
 void FingerPrint::add () {
-    printf("Please put your finger on the module.\n");
+    qDebug("++ADD++ Please put your finger on the module.\n");
     if (waitUntilDetectFinger(5000)) {
+      //delay for wait customer put whole finger on
       delay(500);
       PS_GetImage() || PS_Exit();
       PS_GenChar(1) || PS_Exit();
+      //delay for wait customer put whole finger on
+      delay(500);
+      PS_GetImage() || PS_Exit();
+      PS_GenChar(2) || PS_Exit();
     }
     else {
-      printf("Error: Didn't detect finger!\n");
-      exit(1);
-    }
-
-    // 判断用户是否抬起了手指，
-    printf("Ok.\nPlease raise your finger!\n");
-    if (waitUntilNotDetectFinger(5000)) {
-      delay(100);
-      printf("Ok.\nPlease put your finger again!\n");
-      // 第二次录入指纹
-      if (waitUntilDetectFinger(5000)) {
-        delay(500);
-        PS_GetImage() || PS_Exit();
-        PS_GenChar(2) || PS_Exit();
-      }
-      else {
-        printf("Error: Didn't detect finger!\n");
-        exit(1);
-      }
-    }
-    else {
-      printf("Error! Didn't raise your finger\n");
-      exit(1);
+      qDebug("++ADD++ Error: Didn't detect finger!\n");
+      PS_Exit();
     }
 
     int score = 0;
@@ -62,8 +55,8 @@ void FingerPrint::add () {
       m_CallBack->checkADD(auto_page_id, score) ;
     }
     else {
-      printf("Not matched, raise your finger and put it on again.\n");
-      exit(1);
+      qDebug("++ADD++ Not matched, raise your finger and put it on again.\n");
+      PS_Exit();
     }
     
     if (g_error_code != 0x00)
@@ -73,7 +66,7 @@ void FingerPrint::add () {
     PS_RegModel() || PS_Exit();
     PS_StoreChar(2, auto_page_id) || PS_Exit();
 
-    printf("OK! New fingerprint saved to pageID=%d\n", ++auto_page_id);
+    qDebug("++ADD++ OK! New fingerprint saved to pageID=%d\n", ++auto_page_id);
   }
 
 
@@ -82,7 +75,7 @@ bool FingerPrint::setUp(uint chipAddr, uint password) {
   g_as608.chip_addr = chipAddr;
   g_as608.password  = password;
   if (g_verbose == 1)
-    printf("-------------------------Initializing-------------------------\n");
+     qDebug("-------------------------Initializing-------------------------\n");
   //verify the password 
   if (g_as608.has_password) {
     if (!PS_VfyPwd(password))
@@ -92,12 +85,12 @@ bool FingerPrint::setUp(uint chipAddr, uint password) {
   // obtain the size of datapack and the baud rate ec.
   if (PS_ReadSysPara() && g_as608.packet_size > 0) {
     if (g_verbose == 1)
-      printf("-----------------------------Done-----------------------------\n");
+       qDebug("-----------------------------Done-----------------------------\n");
     return true;
   }
 
   if (g_verbose == 1)
-    printf("-----------------------------Done-----------------------------\n");
+     qDebug("-----------------------------Done-----------------------------\n");
   g_error_code = 0xC7;
   return PS_Exit();
 }
@@ -216,30 +209,13 @@ bool FingerPrint::waitUntilDetectFinger(int wait_time) {
   }
 }
 
-bool FingerPrint::waitUntilNotDetectFinger(int wait_time) {
-  while (true) {
-    if (! PS_DetectFinger()) {
-      return true;
-    }
-    else {
-      delay(100);
-      wait_time -= 100;
-      if (wait_time < 0) {
-        return false;
-      }
-    }
-  }
-}
-
 bool FingerPrint::PS_DetectFinger() {
   return digitalRead(g_as608.detect_pin) == HIGH;
 }
 
-
-
 void FingerPrint::atExitFunc() {
   if (g_verbose == 1)
-    printf("Exit\n");
+     qDebug("Exit\n");
   if (g_fd > 0)
     serialClose(g_fd);
 }
@@ -247,7 +223,7 @@ void FingerPrint::atExitFunc() {
 //The program exited because the function in as608.h failed to execute
 bool FingerPrint::PS_Exit()
 {
-  printf("ERROR! code=%02X, desc=%s\n", g_error_code,  PS_GetErrorDesc());
+   printf("ERROR! code=%02X, desc=%s\n", g_error_code,  PS_GetErrorDesc());
   return true;
 }
 
