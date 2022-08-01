@@ -1,4 +1,4 @@
-# <div align=center> Fingerprint Locker </div>
+# <div align=center> Touch Lock </div>
 
 
 <div align=center><img width = '250' height ='250' src ="https://user-images.githubusercontent.com/31944208/181933886-f17e06ab-4812-4e36-973f-ed0a9678bc0f.png"/></div>
