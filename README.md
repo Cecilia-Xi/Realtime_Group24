@@ -64,9 +64,10 @@ $ ./finger
 
 
 ## Authors(Contact information is on the [Wiki](https://github.com/xiguo0806/Realtime_Group24/wiki/Authors))
-+ Chongzhi Gao 
 
 + Shaobo Yang 
+
++ Chongzhi Gao 
 
 + Xinyu Ren 
 
