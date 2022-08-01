@@ -24,7 +24,7 @@
 
 
 # About the project
-Considered the electronic technology expeditious raise in the 20th century, people choosed smart home which becomes a big fashionable trend. Embedding chips and system into home gadget automates the operation freely, easily and remotable. Therefore, we proposed a smart lock and produced it. The product implemented with Raspberry Pi 4B, and a fingerprint controlled solenoid lock. This program completely coding in C++, including C libraries.
+Considered the electronic technology expeditious raise in the 20th century, people choosed smart home which becomes a big fashionable trend. Embedding chips and system into home gadget automates the operation freely, easily and remotable. Therefore, we proposed a smart lock and produced it. The product implemented with Raspberry Pi 4B, and a fingerprint controlled solenoid lock. This program completely coding in C++.
 
 ## Installation
 ### Hardware
@@ -37,12 +37,19 @@ Considered the electronic technology expeditious raise in the 20th century, peop
 
 
 ### Software dependent environment
-WiringPi
+WiringPi(Version 2.61-1)
 * `git clone https://github.com/WiringPi/WiringPi.git`
 * Then go to the wiringpi folder`./build`
 * If no permission please type `sudo chmod 777 build` in your terminal and than `./build`
 
+CppThread
 
+* The CppThread.h file is a CppThread Interface, which is a reference cite from the origin Github repository <https://github.com/berndporr/cppThread> authorized by professor Bernd Porr. 
+* You only need to git clone the CppThread.h file to get the Interface. 
+* Copy the link below to download the whole CppThread folder with an example.(The specific implementation can be modified according to your needs, please refer to the CppThread.h file in this project)
+```
+$ git clone https://github.com/berndporr/cppThread
+```
 QT5
 * `sudo apt-get install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools`
 
@@ -72,5 +79,8 @@ $ ./finger
 + Xinyu Ren 
 
 + Shimeng Xi
+
+
+If you have any questions about the project or ideas for improvement, please contact the author.
 
 ---
