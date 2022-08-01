@@ -10,7 +10,9 @@
     <a href="https://www.bilibili.com/video/BV1wF411u73p/">Bilibili</a>
 </p>
 
-
+<p align="center">
+    <a href="https://twitter.com/Touch_Lock1/status/1553953862469537792?s=20&t=GUFME6HIG1PPSuC41bp7uA">Twitter account</a>
+</p>
 
 <p align="center">
     <a href="https://github.com/xiguo0806/Realtime_Group24/issues" alt="Issues">
